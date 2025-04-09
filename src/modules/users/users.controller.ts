@@ -11,6 +11,7 @@ export class UsersController {
     const user = await this.usersService.findByEmail(email);
     return user ?? { message: 'User not found' };
   }
+  
 
   @Post('create')
   async createUser(@Body() body: UserCreationAttributes) {
