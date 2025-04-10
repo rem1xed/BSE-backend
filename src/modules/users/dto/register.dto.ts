@@ -4,7 +4,7 @@ export interface UserCreationAttributes {
   email: string;
   phone: string;
   password: string;
-  bonuses?: number;
-  resetToken?: string;
-  resetTokenExpires?: Date;
+  // bonuses?: number;
+  // resetToken?: string;
+  // resetTokenExpires?: Date;
 }
