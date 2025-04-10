@@ -3,9 +3,10 @@ import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [JwtModule, ConfigModule.forRoot()],
+  imports: [JwtModule, ConfigModule.forRoot(), UsersModule],
   controllers: [EmailController],
   providers: [EmailService],
   exports: [EmailService]
