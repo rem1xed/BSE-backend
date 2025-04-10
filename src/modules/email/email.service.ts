@@ -40,7 +40,7 @@ export class EmailService {
             if (typeof payload === 'object' && 'email' in payload) {
                 return payload.email;
             }
-            throw new BadRequestException();
+            throw new BadRequestException('Invalid token payload');
         } catch (error) {
             if (error?.name === 'TokenExpiredError') {
                 throw new BadRequestException(
@@ -67,11 +67,13 @@ export class EmailService {
           }
 
         user.resetToken = token;
+        await user.save();
 
         const url = `${this.configService.get('EMAIL_RESET_PASSWORD_URL')}?token=${token}`;
-
         const text = `Hi, \nTo reset your password, click here: ${url}`;
 
+        this.logger.debug(`Reset link for ${email}: ${url}`);
+        
         return this.sendMail({
             to: email,
             subject: 'Reset password',

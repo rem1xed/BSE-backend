@@ -6,7 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [JwtModule, ConfigModule.forRoot(), UsersModule],
+  imports: [JwtModule.register({}), ConfigModule, UsersModule],
   controllers: [EmailController],
   providers: [EmailService],
   exports: [EmailService]

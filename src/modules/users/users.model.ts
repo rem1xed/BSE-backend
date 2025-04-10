@@ -9,8 +9,7 @@ import {
   AllowNull,
 } from 'sequelize-typescript';
 
-import { UserCreationAttributes } from './dto/create.dto';
-
+import { UserCreationAttributes } from './dto/register.dto';
 
 @Table
 export class User extends Model<User, UserCreationAttributes> {
