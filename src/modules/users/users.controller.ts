@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Post, Body, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UserCreationAttributes } from './dto/create.dto';
+import { UserCreationAttributes } from './dto/register.dto';
 
 @Controller('users')
 export class UsersController {
@@ -17,11 +17,11 @@ export class UsersController {
     const { email, phone, password, firstName, lastName } = body;
 
     const newUser = await this.usersService.createUser({
+      firstName,
+      lastName,
       email,
       phone,
       password,
-      firstName,
-      lastName,
     });
 
     return newUser;
