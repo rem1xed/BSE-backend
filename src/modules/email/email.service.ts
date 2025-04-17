@@ -13,12 +13,12 @@ export class EmailService {
     constructor(
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
-        private readonly usersService: UsersService
+        private readonly usersService: UsersService,
     ) {
         this.nodemailerTransport = createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
+            host: 'smtp.ethereal.email',
+            port: 587,
+            secure: false,
             auth: {
                 user: configService.get('EMAIL_USER'),
                 pass: configService.get('EMAIL_PASSWORD')
@@ -70,10 +70,10 @@ export class EmailService {
         await user.save();
 
         const url = `${this.configService.get('EMAIL_RESET_PASSWORD_URL')}?token=${token}`;
-        const text = `Hi, \nTo reset your password, click here: ${url}`;
+        const text = `Hi, \nTo reset your password, click here: ${token}`;
 
         this.logger.debug(`Reset link for ${email}: ${url}`);
-        
+        //
         return this.sendMail({
             to: email,
             subject: 'Reset password',

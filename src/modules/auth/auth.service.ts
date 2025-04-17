@@ -92,9 +92,11 @@ export class AuthService {
   }
 
   async forgotPassword(email: string): Promise<void> {
-    //const user = dbUsers.find((user) => user.email === email);
-
+    console.log('[DEBUG] Forgot password triggered for:', email);
+    
     const user = await this.usersService.findByEmail(email);
+    console.log('[DEBUG] User found:', user);
+
 
     if (!user) {
         throw new NotFoundException(`No user found for email: ${email}`);
@@ -103,6 +105,7 @@ export class AuthService {
 }
 
   async resetPassword(token: string, password: string): Promise<void> {
+    
     const email = await this.emailService.decodeConfirmationToken(token);
 
     const user = await this.usersService.findByEmail(email);
@@ -112,7 +115,7 @@ export class AuthService {
 
     user.password = password;
    
-    user.resetToken = null; // remove the token after the password is updated
+    user.resetToken = null;
     await user.save();
 } 
 }
