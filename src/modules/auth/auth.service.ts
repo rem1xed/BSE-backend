@@ -12,11 +12,24 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+  async login(user: any) {
+    const payload = { email: user.email, sub: user.id };
+    return {
+      user,
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
     
     if (!user) {
       return null;
+    }
+    
+    if (!user.password) {
+      console.log('Користувач знайдений, але пароль відсутній:', user.email);
+      return null; // або throw new Error('User has no password set');
     }
     
     const isPasswordValid = await bcrypt.compare(password, user.password);
