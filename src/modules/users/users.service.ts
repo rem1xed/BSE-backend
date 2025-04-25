@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './users.model';
-import { UserCreationAttributes } from './dto/create.dto';
+import { UserCreationAttributes } from './dto/register.dto';
 
 @Injectable()
 export class UsersService {
@@ -29,9 +29,16 @@ export class UsersService {
       throw new Error('User with this email already exists');
     }
 
-    const user = await this.userModel.create(createUserDto);
+    const user = await this.userModel.create({
+      ...createUserDto,
+    });
 
     return user;
+  }
+
+  async updateUser(id: number, updateData: Partial<User>): Promise<User | null> {
+    await this.userModel.update(updateData, { where: { id } });
+    return this.findById(id);
   }
 
   async updateResetToken(email: string, token: string, expires: Date): Promise<void> {

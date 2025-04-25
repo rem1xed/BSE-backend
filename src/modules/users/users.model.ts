@@ -9,8 +9,7 @@ import {
   AllowNull,
 } from 'sequelize-typescript';
 
-import { UserCreationAttributes } from './dto/create.dto';
-
+import { UserCreationAttributes } from './dto/register.dto';
 
 @Table
 export class User extends Model<User, UserCreationAttributes> {
@@ -21,36 +20,36 @@ export class User extends Model<User, UserCreationAttributes> {
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  firstName: string;
+  declare firstName: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  lastName: string;
-
-  @Unique
-  @AllowNull(false)
-  @Column(DataType.STRING)
-  email: string;
+  declare lastName: string;
 
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
-  phone: string;
+  declare email: string;
+
+  @Unique
+  @AllowNull(false)
+  @Column(DataType.STRING)
+  declare phone: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  password: string;
+  declare password: string;
 
   @AllowNull(false)
   @Column({
     type: DataType.FLOAT,
     defaultValue: 0,
   })
-  bonuses: number;
+  declare bonuses: number;
 
   @Column(DataType.STRING)
-  resetToken: string | null;
+  declare resetToken: string | null;
 
   @Column(DataType.DATE)
-  resetTokenExpires: Date | null;
+  declare resetTokenExpires: Date | null;
 }
