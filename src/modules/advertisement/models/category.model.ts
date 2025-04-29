@@ -1,10 +1,16 @@
+//src\modules\advertisement\models\category.model.ts
+
 import { Table, Column, Model, DataType, HasMany } from 'sequelize-typescript';
 import { Product } from './advertisement.model';
+
+interface CategoryCreationAttributes {
+  name: string;
+}
 
 @Table({
   tableName: 'categories'
 })
-export class Category extends Model {
+export class Category extends Model<Category, CategoryCreationAttributes> {
   @Column({
     type: DataType.INTEGER,
     autoIncrement: true,
