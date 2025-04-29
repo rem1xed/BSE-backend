@@ -1,17 +1,10 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Get,
-  Req,
-  Res,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Controller, Post, Body, UseGuards, Get, Request,Req, Res, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { Response, Request } from 'express';
+
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
@@ -19,23 +12,8 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const user = await this.authService.validateUser(loginDto.email, loginDto.password);
-
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const token = await this.authService.login(user);
-
-    res.cookie('jwt', token.access_token, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: false, // постав true, якщо у тебе HTTPS
-      maxAge: 24 * 60 * 60 * 1000, // 1 день
-    });
-
-    return { message: 'Login successful' };
+  async login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto);
   }
 
   @Post('register')
@@ -43,6 +21,23 @@ export class AuthController {
     return this.authService.register(registerDto);
   }
 
+  @Post('forgot-password')
+  async forgotPassword(@Body() { email }: { email: string }): Promise<void> {
+    return this.authService.forgotPassword(email);
+}
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body() { token, password }: { token: string; password: string }
+): Promise<void> {
+    return this.authService.resetPassword(token, password);
+}
+
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  getProfile(@Request() req) {
+    return req.user;
+  }
   // 🆕 Перевірка залогіненого користувача
   @Get('me')
   @UseGuards(JwtAuthGuard)

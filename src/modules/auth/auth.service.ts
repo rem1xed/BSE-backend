@@ -1,15 +1,23 @@
-import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
+
+import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ConfigService } from '@nestjs/config';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly emailService: EmailService,
   ) {}
 
   async login(user: any) {
@@ -27,6 +35,7 @@ export class AuthService {
       return null;
     }
     
+
     if (!user.password) {
       console.log('Користувач знайдений, але пароль відсутній:', user.email);
       return null; // або throw new Error('User has no password set');
@@ -83,4 +92,32 @@ export class AuthService {
       accessToken: this.jwtService.sign(payload),
     };
   }
+
+  async forgotPassword(email: string): Promise<void> {
+    console.log('[DEBUG] Forgot password triggered for:', email);
+    
+    const user = await this.usersService.findByEmail(email);
+    console.log('[DEBUG] User found:', user);
+
+
+    if (!user) {
+        throw new NotFoundException(`No user found for email: ${email}`);
+    }
+    await this.emailService.sendResetPasswordLink(email);
+}
+
+  async resetPassword(token: string, password: string): Promise<void> {
+    
+    const email = await this.emailService.decodeConfirmationToken(token);
+
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+        throw new NotFoundException(`No user found for email: ${email}`);
+    }
+
+    user.password = password;
+   
+    user.resetToken = null;
+    await user.save();
+} 
 }
