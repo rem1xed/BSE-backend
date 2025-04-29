@@ -1,13 +1,16 @@
 import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
+
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../email/email.service';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -17,11 +20,25 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
+  async login(user: any) {
+    const payload = { email: user.email, sub: user.id };
+    return {
+      user,
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
     
     if (!user) {
       return null;
+    }
+    
+
+    if (!user.password) {
+      console.log('Користувач знайдений, але пароль відсутній:', user.email);
+      return null; // або throw new Error('User has no password set');
     }
     
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -32,21 +49,6 @@ export class AuthService {
     }
     
     return null;
-  }
-
-  async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
-    
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-    
-    const payload = { email: user.email, sub: user.id };
-    
-    return {
-      user,
-      accessToken: this.jwtService.sign(payload),
-    };
   }
 
   async register(registerDto: RegisterDto) {
