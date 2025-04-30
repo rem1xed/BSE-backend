@@ -1,15 +1,24 @@
-import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException, NotFoundException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
+import { MailService } from '../mail/mail.service';
+import { Op } from 'sequelize';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { VerifyCodeDto } from './dto/verify-code.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResetToken } from './models/reset-token.model';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
+    @Inject('RESET_TOKEN_REPOSITORY')
+    private resetTokenRepository: typeof ResetToken,
   ) {}
 
   async login(user: any) {
@@ -82,5 +91,84 @@ export class AuthService {
       user: result,
       accessToken: this.jwtService.sign(payload),
     };
+  }
+
+  
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
+    const { email } = forgotPasswordDto;
+    const user = await this.usersService.findByEmail(email);
+    
+    if (!user) {
+      throw new NotFoundException('Користувача з такою електронною поштою не знайдено');
+    }
+
+    // Генеруємо випадковий код із 6 цифр
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Встановлюємо термін дії коду (30 хвилин)
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 30);
+
+    // Видаляємо старі токени для цього користувача
+    await this.resetTokenRepository.destroy({ where: { email } });
+
+    // Створюємо новий токен скидання пароля
+    await this.resetTokenRepository.create({
+      email,
+      code,
+      expiresAt,
+    });
+    
+    // Надсилаємо код на електронну пошту
+    await this.mailService.sendPasswordResetCode(email, code);
+  }
+
+  async verifyCode(verifyCodeDto: VerifyCodeDto): Promise<boolean> {
+    const { email, code } = verifyCodeDto;
+    
+    const resetToken = await this.resetTokenRepository.findOne({
+      where: {
+        email,
+        code,
+        isUsed: false,
+        expiresAt: {
+          [Op.gt]: new Date(), // Перевіряємо, що термін дії не закінчився
+        },
+      },
+    });
+
+    if (!resetToken) {
+      throw new BadRequestException('Недійсний або прострочений код');
+    }
+
+    
+    return true;
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
+    const { email, code, newPassword } = resetPasswordDto;
+    
+    // Перевіряємо, чи існує такий код скидання
+    const resetToken = await this.resetTokenRepository.findOne({
+      where: {
+        email,
+        code,
+        isUsed: false,
+        expiresAt: {
+          [Op.gt]: new Date(), // Перевіряємо, що термін дії не закінчився
+        },
+      },
+    });
+
+    if (!resetToken) {
+      throw new BadRequestException('Недійсний або прострочений код');
+    }
+
+    // Оновлюємо пароль користувача
+    await this.usersService.updatePassword(email, newPassword);
+    
+    // Позначаємо токен як використаний
+    resetToken.isUsed = true;
+    await resetToken.save();
   }
 }

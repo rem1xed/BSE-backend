@@ -7,17 +7,28 @@ import { UsersModule } from '../users/users.module';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { jwtConstants } from '../../constants/constants';
+import { authProviders } from './auth.providers';
+import { MailModule } from '../mail/mail.module'; // Add this import
+import { SequelizeModule } from '@nestjs/sequelize';
+import { ResetToken } from './models/reset-token.model';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
-    JwtModule.register({
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: '24h' },
-    }),
+    SequelizeModule.forFeature([ResetToken]),
+    MailModule, // Add this import
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: jwtConstants.secret,
+        signOptions: { expiresIn: '24h' },
+      }),
+    })
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, ...authProviders],
   controllers: [AuthController],
   exports: [AuthService],
 })
