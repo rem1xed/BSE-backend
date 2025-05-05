@@ -3,7 +3,7 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { Response, Request } from 'express';
+import { Response } from 'express';
 
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
@@ -35,9 +35,9 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
+  // getProfile(@Request() req) { //caused an error
+  //   return req.user;
+  // } 
   // 🆕 Перевірка залогіненого користувача
   @Get('me')
   @UseGuards(JwtAuthGuard)
