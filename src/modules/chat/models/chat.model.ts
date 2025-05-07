@@ -52,7 +52,10 @@ export class Chat extends Model {
   lastMessageAt: Date;
 
   // Relationships
-  @BelongsTo(() => User, 'sender_id')
+  @BelongsTo(() => User,{
+     foreignKey: 'sender_id',
+     as : 'sender'
+  })
   sender: User;
 
   @BelongsTo(() => User, 'receiver_id')

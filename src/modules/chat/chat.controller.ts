@@ -3,6 +3,7 @@ import { ChatService } from './chat.service';
 import { ChatResponseDto, CreateChatDto } from './dto/chat.dto'; 
 import { CreateMessageDto, MessageResponseDto } from './dto/message.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { userInfo } from 'os';
 
 @Controller('chats')
 @UseGuards(JwtAuthGuard)
@@ -25,14 +26,14 @@ export class ChatController {
   }
 
   @Post()
-  async createChat(
-    @Body() createChatDto: CreateChatDto,
-    @Request() req,
-  ): Promise<any> {
-    // Ensure the sender is the current user
-    createChatDto.senderId = req.user.userId;
-    const chat = await this.chatService.createChat(createChatDto);
-    return { chatId: chat.chatId };
+  async createChat(@Body() createChatDto: CreateChatDto, @Request() req) {
+    // Set the sender ID from the authenticated user
+    const completeDto = { 
+      ...createChatDto,
+      senderId: req.user.id 
+    };
+    
+    return this.chatService.createChat(completeDto);
   }
 
   @Post('messages')
@@ -41,7 +42,7 @@ export class ChatController {
     @Request() req,
   ): Promise<any> {
     // Ensure the sender is the current user
-    createMessageDto.senderId = req.user.userId;
+    createMessageDto.senderId = req.user.id;
     const message = await this.chatService.sendMessage(createMessageDto);
     return { messageId: message.messageId };
   }

@@ -13,4 +13,4 @@ export class CreateChatDto {
     lastMessageTime: Date;
     unreadCount: number;
   }
-  
+

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Chat } from './models/chat.model';
 import { Message } from './message/message.model';
@@ -30,12 +30,12 @@ export class ChatService {
         {
           model: User,
           as: 'sender',
-          attributes: ['userId', 'firstName', 'lastName'],
+          attributes: ['id', 'firstName', 'lastName'],
         },
         {
           model: User,
           as: 'receiver',
-          attributes: ['userId', 'firstName', 'lastName'],
+          attributes: ['id', 'firstName', 'lastName'],
         },
         {
           model: Message,
@@ -175,8 +175,10 @@ export class ChatService {
     }
 
     // Check if user is part of the chat
-    if (chat.senderId !== createMessageDto.senderId && chat.receiverId !== createMessageDto.senderId) {
-      throw new NotFoundException('You are not a participant in this chat');
+    console.log("chat.senderId", chat.get('senderId'));
+    console.log("createMessageDto.senderId", createMessageDto.senderId);
+    if (chat.get('senderId') !== createMessageDto.senderId) {
+      throw new BadRequestException('You are not a participant in this chat');
     }
 
     // Update the last message time in chat
