@@ -20,12 +20,25 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  async login(user: any) {
+  async login(loginDto: LoginDto) {
+    const user = await this.validateUser(loginDto.email, loginDto.password);
+    
+    if (!user) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
+  
     const payload = { email: user.email, sub: user.id };
     return {
-      user,
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async validateUserById(id: number) {
+    const user = await this.usersService.findById(id);
+    if (!user) return null;
+
+    const { password, resetToken, resetTokenExpires, ...userData } = user.get({ plain: true });
+    return userData;
   }
 
   async validateUser(email: string, password: string): Promise<any> {

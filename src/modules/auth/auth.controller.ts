@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Get, Request,Req, Res, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get,Req, Res, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -33,11 +33,6 @@ export class AuthController {
     return this.authService.resetPassword(token, password);
 }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@Request() req) {
-    return req.user;
-  }
   // 🆕 Перевірка залогіненого користувача
   @Get('me')
   @UseGuards(JwtAuthGuard)
