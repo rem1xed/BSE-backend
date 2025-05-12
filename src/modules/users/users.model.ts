@@ -19,11 +19,17 @@ export class User extends Model<User, UserCreationAttributes> {
   declare id: number;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column( {
+    type: DataType.STRING,
+    field: 'firstName'
+  })
   declare firstName: string;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column( {
+    type: DataType.STRING,
+    field: 'lastName'
+  })
   declare lastName: string;
 
   @Unique

@@ -21,10 +21,21 @@ export class AuthService {
   ) {}
 
   async login(user: any) {
-    const payload = { email: user.email, sub: user.id };
+    
+    const User = await this.usersService.findByEmail(user.email);
+    var payload;
+    if(!User)
+    {
+        payload = { email: user.email, sub: user.id };
+    }
+    else
+    {
+        payload = { email: User.email, sub: User.id };
+    }
+     
     return {
       user,
-      access_token: this.jwtService.sign(payload),
+      accesstoken: this.jwtService.sign(payload),
     };
   }
 
