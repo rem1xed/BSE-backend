@@ -52,20 +52,12 @@ export class Chat extends Model {
   lastMessageAt: Date;
 
   // Relationships
-  @BelongsTo(() => User, {
-    foreignKey: 'sender_id',
-    as: 'sender'
-  })
+  @BelongsTo(() => User, { foreignKey: 'sender_id', as: 'sender' })
   sender: User;
 
-  @BelongsTo(() => User, {
-    foreignKey: 'receiver_id',
-    as: 'receiver'
-  })
+  @BelongsTo(() => User, { foreignKey: 'receiver_id', as: 'receiver' })
   receiver: User;
 
-  @HasMany(() => Message, {
-    foreignKey: 'chat_id'
-  })
+  @HasMany(() => Message, { foreignKey: 'chat_id', as: 'messages' })
   messages: Message[];
 }

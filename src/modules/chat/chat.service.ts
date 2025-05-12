@@ -19,73 +19,97 @@ export class ChatService {
     private userModel: typeof User,
   ) {}
 
-  async getUserChats(userId: number): Promise<ChatResponseDto[]> {
-    console.log('Getting chats for userId:', userId);
-    
-    if (!userId || isNaN(userId)) {
-      throw new BadRequestException('Invalid user ID');
-    }
-
-    const chats = await this.chatModel.findAll({
-      where: {
-        [Op.or]: [
-          { 
-            senderId: userId,
-            receiverId: userId,
-          },
-        ],
-      },
-      include: [
-        {
-          model: User,
-          as: 'sender',
-          attributes: ['id', 'firstName', 'lastName'],
-        },
-        {
-          model: Message,
-          limit: 1,
-          order: [['sentAt', 'DESC']],
-          attributes: ['messageId', 'chatId', 'message', 'sentAt'],
-        },
-      ],
-      order: [['lastMessageAt', 'DESC']],
-    });
-
-    // Format response
-    return Promise.all(
-      chats.map(async (chat) => {
-        const otherUser = chat.senderId === userId ? chat.receiver : chat.sender;
-        
-        
-        const unreadCount = await this.messageModel.count({
-          where: {
-            chatId: chat.chatId,
-            senderId: { [Op.ne]: userId },
-            isRead: false,
-          },
-        });
-
-        
-        const lastMessage = chat.messages && chat.messages.length > 0
-          ? chat.messages[0].message
-          : '';
-        
-        const lastMessageTime = chat.messages && chat.messages.length > 0
-          ? chat.messages[0].sentAt
-          : chat.lastMessageAt;
-
-        return {
-          chatId: chat.chatId,
-          adId: chat.adId,
-          otherUserId: otherUser?.id,
-          otherUserName: otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : 'Unknown User',
-          lastMessage: lastMessage,
-          lastMessageTime: lastMessageTime,
-          unreadCount: unreadCount,
-        };
-      })
-    );
+async getUserChats(userId: number): Promise<ChatResponseDto[]> {
+  console.log('Getting chats for userId:', userId);
+  
+  if (!userId || isNaN(userId)) {
+    throw new BadRequestException('Invalid user ID');
   }
+
+  // Find all chats where the user is either sender or receiver
+  const chats = await this.chatModel.findAll({
+    where: {
+      [Op.or]: [
+        { senderId: userId },
+        { receiverId: userId },
+      ],
+    },
+    include: [
+      {
+        model: User,
+        as: 'sender',
+        attributes: ['id', 'firstName', 'lastName'],
+        required: false
+      },
+      {
+        model: User,
+        as: 'receiver',
+        attributes: ['id', 'firstName', 'lastName'],
+        required: false
+      },
+    ],
+    order: [['lastMessageAt', 'DESC']],
+  });
+
+  console.log('Retrieved chats count:', chats.length);
+  
+  if (chats.length === 0) {
+    return [];
+  }
+
+  // Process each chat to format the response
+  const chatResponses = await Promise.all(chats.map(async (chat) => {
+    // Convert to plain object
+    const plainChat = chat.toJSON ? chat.toJSON() : chat;
+    console.log(`Processing chat ${plainChat.chatId}`);
+    
+    // Determine the other user (not the current user)
+    const isCurrentUserSender = plainChat.senderId === userId;
+    const otherUser = isCurrentUserSender ? plainChat.receiver : plainChat.sender;
+    
+    // Get last message for this chat
+    const lastMessage = await this.messageModel.findOne({
+      where: { chatId: plainChat.chatId },
+      order: [['sentAt', 'DESC']],
+      attributes: ['messageId', 'message', 'sentAt'],
+    });
+    
+    // Count unread messages
+    const unreadCount = await this.messageModel.count({
+      where: {
+        chatId: plainChat.chatId,
+        senderId: { [Op.ne]: userId },
+        isRead: false,
+      },
+    });
+    
+    // Format other user name
+    let otherUserName = 'Unknown User';
+    let otherUserId = 0;
+    
+    if (otherUser) {
+      otherUserId = otherUser.id;
+      if (otherUser.firstName || otherUser.lastName) {
+        otherUserName = `${otherUser.firstName || ''} ${otherUser.lastName || ''}`.trim() || 'Unknown User';
+      }
+    }
+    
+    // Format last message info
+    const lastMessagePlain = lastMessage?.toJSON ? lastMessage.toJSON() : lastMessage;
+    
+    return {
+      chatId: plainChat.chatId,
+      adId: plainChat.adId,
+      otherUserId: otherUserId,
+      otherUserName: otherUserName,
+      lastMessage: lastMessagePlain?.message || '',
+      lastMessageTime: lastMessagePlain?.sentAt || plainChat.lastMessageAt,
+      unreadCount: unreadCount,
+    };
+  }));
+
+  return chatResponses;
+}
 
   async getChatMessages(chatId: number, userId: number): Promise<MessageResponseDto[]> {
     console.log('Getting messages for chatId:', chatId, 'userId:', userId);
@@ -114,7 +138,7 @@ export class ChatService {
       where: { chatId },
       include: [
         {
-           model: User,
+          model: User,
           as: 'sender',
           attributes: ['id', 'firstName', 'lastName'],
           required: false
@@ -136,8 +160,6 @@ export class ChatService {
         },
       }
     );
-  
-
 
       const messageResponses = messages.map((message) => {
 

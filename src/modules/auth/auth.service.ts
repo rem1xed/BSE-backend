@@ -21,21 +21,17 @@ export class AuthService {
   ) {}
 
   async login(user: any) {
-    
-    const User = await this.usersService.findByEmail(user.email);
-    var payload;
-    if(!User)
-    {
-        payload = { email: user.email, sub: user.id };
+    const userFromDb = await this.usersService.findByEmail(user.email);
+
+    if (!userFromDb) {
+      throw new UnauthorizedException('Invalid email or user does not exist');
     }
-    else
-    {
-        payload = { email: User.email, sub: User.id };
-    }
-     
+
+    const payload = { email: userFromDb.email, sub: userFromDb.id };
+
     return {
-      user,
-      accesstoken: this.jwtService.sign(payload),
+      user: userFromDb,
+      accessToken: this.jwtService.sign(payload),
     };
   }
 

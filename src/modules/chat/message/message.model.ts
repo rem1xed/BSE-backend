@@ -52,6 +52,7 @@ export class Message extends Model {
   declare sentAt: Date;
 
   // Relationships
+
   @BelongsTo(() => Chat, 'chat_id')
   chat: Chat;
 
