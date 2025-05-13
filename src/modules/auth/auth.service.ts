@@ -10,6 +10,7 @@ import { RegisterDto } from './dto/register.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ConfigService } from '@nestjs/config';
 import { EmailService } from '../email/email.service';
+import { User } from '../users/users.model';
 
 @Injectable()
 export class AuthService {
@@ -20,15 +21,30 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  async login(user: any) {
-    const payload = { email: user.email, sub: user.id };
+  async login(user: LoginDto) {
+
+    console.log("Login dto : ", user);
+
+    const email = user.email || user['email'];
+    const password = user.password || user['password'];
+    const validatedUser = await this.validateUser(email, password);
+
+    if(!validatedUser){
+        throw new BadRequestException("Wrong password !");
+    }
+
+    const payload = { email: validatedUser.email, sub: validatedUser.id };
+
     return {
-      user,
-      access_token: this.jwtService.sign(payload),
+      user : validatedUser,
+      accessToken: this.jwtService.sign(payload),
     };
   }
 
   async validateUser(email: string, password: string): Promise<any> {
+
+    console.log("VALIDATE email: ", email, "password",  password);
+
     const user = await this.usersService.findByEmail(email);
     
     if (!user) {
