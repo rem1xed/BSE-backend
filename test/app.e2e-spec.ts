@@ -6,7 +6,7 @@ import { AppModule } from './../src/app.module';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './../src/modules/auth/auth.service';
 import { UsersService } from './../src/modules/users/users.service';
-import { EmailService } from './../src/modules/email/email.service';
+import { EmailService } from '../src/modules/mail/mail.service';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
