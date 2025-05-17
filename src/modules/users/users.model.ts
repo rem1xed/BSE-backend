@@ -52,4 +52,12 @@ export class User extends Model<User, UserCreationAttributes> {
 
   @Column(DataType.DATE)
   declare resetTokenExpires: Date | null;
+
+  @Column({ defaultValue: false })
+  isBanned: boolean;
+
+  @Column({ defaultValue: 'user' })
+  role: string;
+
+
 }

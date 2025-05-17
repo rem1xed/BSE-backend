@@ -2,8 +2,8 @@ import { Injectable, UnauthorizedException, NotFoundException, ForbiddenExceptio
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from '../users/users.model';
 import { Advertisement } from '../advertisements/advertisements.model';
-import { Chat } from '../chat/chat.model';
-import { Message } from '../chat/message.model';
+import { Chat } from '../chat/models/chat.model';
+import { Message } from '../chat/message/message.model';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { AdminLoginDto } from './dto/admin-login.dto';
