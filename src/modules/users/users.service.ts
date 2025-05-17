@@ -1,25 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { User } from './users.model';
+import { Injectable, Inject } from '@nestjs/common';
+import { User } from './models/users.model';
 import { UserCreationAttributes } from './dto/register.dto';
+import * as bcrypt from 'bcryptjs';  // Змінено з bcrypt на bcryptjs
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User)
-    private userModel: typeof User,
+    @Inject('USER_REPOSITORY')
+    private userRepository: typeof User,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({ where: { email } }) as Promise<User | null>;
+    return this.userRepository.findOne({ where: { email } });
   }
 
   async findByPhone(phone: string): Promise<User | null> {
-    return this.userModel.findOne({ where: { phone } }) as Promise<User | null>;
+    return this.userRepository.findOne({ where: { phone } });
   }
 
   async findById(id: number): Promise<User | null> {
-    return this.userModel.findByPk(id) as Promise<User | null>;
+    return this.userRepository.findByPk(id);
   }
 
   async createUser(createUserDto: UserCreationAttributes): Promise<User> {
@@ -29,7 +29,7 @@ export class UsersService {
       throw new Error('User with this email already exists');
     }
 
-    const user = await this.userModel.create({
+    const user = await this.userRepository.create({
       ...createUserDto,
     });
 
@@ -37,19 +37,19 @@ export class UsersService {
   }
 
   async updateUser(id: number, updateData: Partial<User>): Promise<User | null> {
-    await this.userModel.update(updateData, { where: { id } });
+    await this.userRepository.update(updateData, { where: { id } });
     return this.findById(id);
   }
 
   async updateResetToken(email: string, token: string, expires: Date): Promise<void> {
-    await this.userModel.update(
+    await this.userRepository.update(
       { resetToken: token, resetTokenExpires: expires },
       { where: { email } },
     );
   }
 
   async resetPassword(token: string, newHashedPassword: string): Promise<boolean> {
-    const user = await this.userModel.findOne({ where: { resetToken: token } });
+    const user = await this.userRepository.findOne({ where: { resetToken: token } });
 
     if (!user || !user.resetTokenExpires || user.resetTokenExpires < new Date()) {
       return false;
@@ -61,5 +61,13 @@ export class UsersService {
     await user.save();
 
     return true;
+  }
+
+  async updatePassword(email: string, newPassword: string): Promise<void> {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.update(
+      { password: hashedPassword },
+      { where: { email } }
+    );
   }
 }

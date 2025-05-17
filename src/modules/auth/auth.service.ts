@@ -4,33 +4,48 @@ import {
   BadRequestException,
   ConflictException,
   NotFoundException,
+  Inject,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { Op } from 'sequelize';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { VerifyCodeDto } from './dto/verify-code.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResetToken } from './models/reset-token.model';
+import { User } from '../users/models/users.model';
 import { ConfigService } from '@nestjs/config';
-import { EmailService } from '../email/email.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly emailService: EmailService,
+    private readonly mailService: MailService,
+    private readonly emailService: MailService,
+    @Inject('RESET_TOKEN_REPOSITORY')
+    private resetTokenRepository: typeof ResetToken,
   ) {}
 
-  async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.email, loginDto.password);
+  async login(user: LoginDto) {
+    console.log("Login dto : ", user);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
+    const email = user.email || user['email'];
+    const password = user.password || user['password'];
+    const validatedUser = await this.validateUser(email, password);
+
+    if (!validatedUser) {
+      throw new BadRequestException("Wrong password !");
     }
 
-    const payload = { email: user.email, sub: user.id };
+    const payload = { email: validatedUser.email, sub: validatedUser.id };
+
     return {
+      user: validatedUser,
       access_token: this.jwtService.sign(payload),
     };
   }
@@ -44,6 +59,8 @@ export class AuthService {
   }
 
   async validateUser(email: string, password: string): Promise<any> {
+    console.log("VALIDATE email: ", email, "password", password);
+
     const user = await this.usersService.findByEmail(email);
     if (!user || !user.password) {
       return null;
@@ -90,27 +107,80 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(email: string): Promise<void> {
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
+    const { email } = forgotPasswordDto;
+
     const user = await this.usersService.findByEmail(email);
+
     if (!user) {
-      throw new NotFoundException(`No user found for email: ${email}`);
+      throw new NotFoundException('Користувача з такою електронною поштою не знайдено');
     }
 
-    await this.emailService.sendResetPasswordLink(email);
+    // Генеруємо випадковий код із 6 цифр
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Встановлюємо термін дії коду (30 хвилин)
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 30);
+
+    // Видаляємо старі токени для цього користувача
+    await this.resetTokenRepository.destroy({ where: { email } });
+
+    // Створюємо новий токен скидання пароля
+    await this.resetTokenRepository.create({
+      email,
+      code,
+      expiresAt,
+    });
+
+    // Надсилаємо код на електронну пошту
+    await this.mailService.sendPasswordResetCode(email, code);
   }
 
-  async resetPassword(token: string, password: string): Promise<void> {
-    const email = await this.emailService.decodeConfirmationToken(token);
-    const user = await this.usersService.findByEmail(email);
-    if (!user) {
-      throw new NotFoundException(`No user found for email: ${email}`);
+  async verifyCode(verifyCodeDto: VerifyCodeDto): Promise<boolean> {
+    const { email, code } = verifyCodeDto;
+
+    const resetToken = await this.resetTokenRepository.findOne({
+      where: {
+        email,
+        code,
+        isUsed: false,
+        expiresAt: {
+          [Op.gt]: new Date(),
+        },
+      },
+    });
+
+    if (!resetToken) {
+      throw new BadRequestException('Недійсний або прострочений код');
     }
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    return true;
+  }
 
-    user.password = hashedPassword;
-    user.resetToken = null;
-    await user.save();
+  async resetPassword(resetPasswordDto: ResetPasswordDto): Promise<void> {
+    const { email, code, newPassword } = resetPasswordDto;
+
+    const resetToken = await this.resetTokenRepository.findOne({
+      where: {
+        email,
+        code,
+        isUsed: false,
+        expiresAt: {
+          [Op.gt]: new Date(),
+        },
+      },
+    });
+
+    if (!resetToken) {
+      throw new BadRequestException('Недійсний або прострочений код');
+    }
+
+    // Оновлюємо пароль користувача
+    await this.usersService.updatePassword(email, newPassword);
+
+    // Позначаємо токен як використаний
+    resetToken.isUsed = true;
+    await resetToken.save();
   }
 }

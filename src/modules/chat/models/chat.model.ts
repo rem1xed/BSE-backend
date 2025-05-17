@@ -1,5 +1,5 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo, HasMany } from 'sequelize-typescript';
-import { User } from 'src/modules/users/users.model';
+import { User } from 'src/modules/users/models/users.model';
 import { Message } from '../message/message.model';
 
 @Table({
@@ -52,15 +52,12 @@ export class Chat extends Model {
   lastMessageAt: Date;
 
   // Relationships
-  @BelongsTo(() => User,{
-     foreignKey: 'sender_id',
-     as : 'sender'
-  })
+  @BelongsTo(() => User, { foreignKey: 'sender_id', as: 'sender' })
   sender: User;
 
-  @BelongsTo(() => User, 'receiver_id')
+  @BelongsTo(() => User, { foreignKey: 'receiver_id', as: 'receiver' })
   receiver: User;
 
-  @HasMany(() => Message, 'chat_id')
+  @HasMany(() => Message, { foreignKey: 'chat_id', as: 'messages' })
   messages: Message[];
 }

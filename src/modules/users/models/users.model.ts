@@ -1,3 +1,4 @@
+//users.model.ts
 import {
   Table,
   Column,
@@ -7,9 +8,12 @@ import {
   AutoIncrement,
   Unique,
   AllowNull,
+  HasMany,
+  BelongsToMany
 } from 'sequelize-typescript';
-
-import { UserCreationAttributes } from './dto/register.dto';
+import { Advertisement } from 'src/modules/advertisement/models/advertisement.model';
+import { UserCreationAttributes } from '../dto/register.dto';
+import { UserLike } from 'src/modules/advertisement/models/user-like.model';
 
 @Table
 export class User extends Model<User, UserCreationAttributes> {
@@ -19,11 +23,17 @@ export class User extends Model<User, UserCreationAttributes> {
   declare id: number;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column( {
+    type: DataType.STRING,
+    field: 'firstName'
+  })
   declare firstName: string;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column( {
+    type: DataType.STRING,
+    field: 'lastName'
+  })
   declare lastName: string;
 
   @Unique
@@ -53,11 +63,9 @@ export class User extends Model<User, UserCreationAttributes> {
   @Column(DataType.DATE)
   declare resetTokenExpires: Date | null;
 
-  @Column({ defaultValue: false })
-  isBanned: boolean;
+  @HasMany(() => Advertisement)
+  advertisements?: Advertisement[];
 
-  @Column({ defaultValue: 'user' })
-  role: string;
-
-
+  @BelongsToMany(() => require('src/modules/advertisement/models/advertisement.model').Advertisement, () => UserLike)
+  likedAdvertisements: Advertisement[];
 }

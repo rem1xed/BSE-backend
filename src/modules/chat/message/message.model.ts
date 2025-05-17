@@ -1,5 +1,5 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
-import { User } from 'src/modules/users/users.model';
+import { User } from 'src/modules/users/models/users.model';
 import { Chat } from '../models/chat.model';
 
 @Table({
@@ -12,7 +12,7 @@ export class Message extends Model {
     autoIncrement: true,
     field: 'message_id',
   })
-  messageId: number;
+  declare messageId: number;
 
   @ForeignKey(() => Chat)
   @Column({
@@ -20,7 +20,7 @@ export class Message extends Model {
     allowNull: false,
     field: 'chat_id',
   })
-  chatId: number;
+  declare chatId: number;
 
   @ForeignKey(() => User)
   @Column({
@@ -28,33 +28,34 @@ export class Message extends Model {
     allowNull: false,
     field: 'sender_id',
   })
-  senderId: number;
+  declare senderId: number;
 
   @Column({
     type: DataType.TEXT,
     allowNull: false,
     field: 'message',
   })
-  message: string;
+  declare message: string;
 
   @Column({
     type: DataType.BOOLEAN,
     defaultValue: false,
     field: 'is_read',
   })
-  isRead: boolean;
+  declare isRead: boolean;
 
   @Column({
     type: DataType.DATE,
     defaultValue: DataType.NOW,
     field: 'sent_at',
   })
-  sentAt: Date;
+  declare sentAt: Date;
 
   // Relationships
+
   @BelongsTo(() => Chat, 'chat_id')
   chat: Chat;
 
-  @BelongsTo(() => User, 'sender_id')
+  @BelongsTo(() => User, { foreignKey: 'sender_id', as: 'sender' })
   sender: User;
 }

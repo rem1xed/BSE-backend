@@ -16,6 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
+    return { id: payload.sub, email: payload.email };
     const userId = Number(payload.sub);
     if (isNaN(userId)) {
       throw new UnauthorizedException('Invalid token payload: userId is NaN');

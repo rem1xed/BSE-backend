@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { User } from '../users/users.model';
-import { Advertisement } from '../advertisements/advertisements.model';
+import { User } from '../users/models/users.model';
+import { Advertisement } from '../advertisement/models/advertisement.model';
 import { Chat } from '../chat/models/chat.model';
 import { Message } from '../chat/message/message.model';
 import * as bcrypt from 'bcrypt';
@@ -9,7 +9,6 @@ import * as jwt from 'jsonwebtoken';
 import { AdminLoginDto } from './dto/admin-login.dto';
 import { Admin } from './admin.model';
 import { ConfigModule } from '@nestjs/config';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AdminService {

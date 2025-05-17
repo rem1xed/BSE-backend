@@ -4,7 +4,7 @@ import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { Chat } from './models/chat.model';
 import { Message } from './message/message.model';
-import { User } from '../users/users.model';
+import { User } from '../users/models/users.model';
 
 @Module({
   imports: [
