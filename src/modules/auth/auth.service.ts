@@ -20,13 +20,16 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
+  async login(user: any) {
+    const payload = { sub: user.id, email: user.email };
+    console.log('Login user object:', user);
   async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto.email, loginDto.password);
-    
+
     if (!user) {
       throw new UnauthorizedException('Invalid email or password');
     }
-  
+
     const payload = { email: user.email, sub: user.id };
     return {
       access_token: this.jwtService.sign(payload),
@@ -43,63 +46,63 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
-    
+
     if (!user) {
       return null;
     }
-    
+
 
     if (!user.password) {
       console.log('Користувач знайдений, але пароль відсутній:', user.email);
       return null; // або throw new Error('User has no password set');
     }
-    
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
+
     if (isPasswordValid) {
       const { password, resetToken, resetTokenExpires, ...result } = user.toJSON();
       return result;
     }
-    
+
     return null;
   }
 
   async register(registerDto: RegisterDto) {
     const { confirmPassword, ...userDto } = registerDto;
-    
+
     // Перевірка чи паролі співпадають
     if (userDto.password !== confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
-    
+
     // Перевірка на існуючий email
     const existingEmail = await this.usersService.findByEmail(userDto.email);
     if (existingEmail) {
       throw new ConflictException('Email already exists');
     }
-    
+
     // Перевірка на існуючий телефон
     const existingPhone = await this.usersService.findByPhone(userDto.phone);
     if (existingPhone) {
       throw new ConflictException('Phone number already exists');
     }
-    
+
     // Хешування пароля
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(userDto.password, salt);
-    
+
     // Створення користувача
     const newUser = await this.usersService.createUser({
       ...userDto,
       password: hashedPassword,
     });
-    
+
     // Видаляємо пароль з відповіді
     const { password, ...result } = newUser.toJSON();
-    
+
     // Генеруємо JWT
     const payload = { email: result.email, sub: result.id };
-    
+
     return {
       user: result,
       accessToken: this.jwtService.sign(payload),
@@ -108,7 +111,7 @@ export class AuthService {
 
   async forgotPassword(email: string): Promise<void> {
     console.log('[DEBUG] Forgot password triggered for:', email);
-    
+
     const user = await this.usersService.findByEmail(email);
     console.log('[DEBUG] User found:', user);
 
@@ -120,7 +123,7 @@ export class AuthService {
 }
 
   async resetPassword(token: string, password: string): Promise<void> {
-    
+
     const email = await this.emailService.decodeConfirmationToken(token);
 
     const user = await this.usersService.findByEmail(email);
@@ -129,8 +132,8 @@ export class AuthService {
     }
 
     user.password = password;
-   
+
     user.resetToken = null;
     await user.save();
-} 
+}
 }
