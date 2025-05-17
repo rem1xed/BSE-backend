@@ -2,7 +2,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { UpdateAccountDto } from './dto/update-account.dto';
-import { User } from '../users/users.model';
+import { User } from '../users/models/users.model';
 
 @Injectable()
 export class AccountService {

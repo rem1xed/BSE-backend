@@ -202,4 +202,8 @@ export class Advertisement extends Model<
 
   @HasMany(() => AdAttribute)
   attributes: AdAttribute[];
+
+  @Column({ type: DataType.BOOLEAN, defaultValue: true })
+isActive: boolean;
+
 }

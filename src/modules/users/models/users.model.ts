@@ -68,4 +68,12 @@ export class User extends Model<User, UserCreationAttributes> {
 
   @BelongsToMany(() => require('src/modules/advertisement/models/advertisement.model').Advertisement, () => UserLike)
   likedAdvertisements: Advertisement[];
+
+  @Column({ type: DataType.BOOLEAN, defaultValue: false })
+isBanned: boolean;
+
+@Column({ type: DataType.STRING })
+role: string; // або ENUM, якщо є ролі 'user', 'admin' і т.д.
+
+
 }

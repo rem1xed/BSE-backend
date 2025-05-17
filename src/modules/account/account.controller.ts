@@ -4,7 +4,7 @@
   import { UpdateAccountDto } from './dto/update-account.dto';
   import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
   import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-  import { User } from '../users/users.model';
+  import { User } from '../users/models/users.model';
 
   interface RequestWithUser {
     user: {
