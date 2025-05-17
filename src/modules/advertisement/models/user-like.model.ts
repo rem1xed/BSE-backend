@@ -6,7 +6,8 @@ import {
   PrimaryKey,
   CreatedAt,
   AllowNull,
-  BelongsTo
+  BelongsTo,
+  ForeignKey
 } from 'sequelize-typescript';
 import { User } from 'src/modules/users/models/users.model';
 import { Advertisement } from './advertisement.model';
@@ -14,6 +15,7 @@ import { Advertisement } from './advertisement.model';
 @Table
 export class UserLike extends Model {
   @PrimaryKey
+  @ForeignKey(() => User)
   @AllowNull(false)
   @Column({
     type: DataType.INTEGER,
@@ -22,7 +24,7 @@ export class UserLike extends Model {
   userId: number;
 
   @PrimaryKey
-  @BelongsTo(() => User, 'userId')
+  @ForeignKey(() => Advertisement)
   @AllowNull(false)
   @Column({
     type: DataType.INTEGER,
@@ -37,8 +39,9 @@ export class UserLike extends Model {
   })
   likedAt: Date;
 
-  @BelongsTo(() => Advertisement, 'adId')
+  @BelongsTo(() => User)
+  user: User;
+
+  @BelongsTo(() => Advertisement)
   advertisement: Advertisement;
 }
-
-

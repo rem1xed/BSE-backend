@@ -1,12 +1,8 @@
-//advertisement.model
-
 import {
   Table,
   Column,
   Model,
   DataType,
-  PrimaryKey,
-  AutoIncrement,
   ForeignKey,
   BelongsTo,
   HasMany,
@@ -18,27 +14,26 @@ import {
 import { Subcategory } from './subcategory.model';
 import { AdImage } from './ad-image.model';
 import { UserLike } from './user-like.model';
-import { User } from 'src/modules/users/models/users.model';
 import { AdAttribute } from './ad-attribute.model';
-import { InferAttributes, InferCreationAttributes } from 'sequelize';
+import { User } from '../../users/models/users.model';
 
-@Table
-export class Advertisement extends Model<
-  InferAttributes<Advertisement>,
-  InferCreationAttributes<Advertisement>
-> {
-  @PrimaryKey
-  @AutoIncrement
+@Table({
+  tableName: 'Advertisement',
+})
+export class Advertisement extends Model {
+
   @Column({
     type: DataType.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
     field: 'ad_id'
   })
   declare id: number;
 
   @ForeignKey(() => User)
-  @AllowNull(false)
   @Column({
     type: DataType.INTEGER,
+    allowNull : false,
     field: 'author_id'
   })
   authorId: number;
@@ -47,16 +42,26 @@ export class Advertisement extends Model<
   @AllowNull(false)
   @Column({
     type: DataType.INTEGER,
-    field: 'subcategory_id'
+    field: 'subcategory_id',
+    references: {
+      model: 'Subcategory',
+      key: 'subcategory_id'
+    },
+    onDelete: 'RESTRICT',
+    onUpdate: 'CASCADE'
   })
   subcategoryId: number;
 
-  @AllowNull(false)
-  @Column(DataType.STRING)
+  @Column({
+    type: DataType.STRING,
+    allowNull : false,
+  })
   title: string;
 
-  @AllowNull(false)
-  @Column(DataType.TEXT)
+  @Column({
+    type: DataType.TEXT,
+    allowNull :false
+  })
   description: string;
 
   @Column(DataType.DECIMAL(10, 2))
@@ -81,26 +86,26 @@ export class Advertisement extends Model<
   @Column(DataType.STRING)
   location: string;
 
-  @AllowNull(true) // Updated to allow null
+  @AllowNull(true)
   @Column({
     type: DataType.STRING,
     field: 'district'
   })
-  district: string | null; // Updated type to include null
+  district: string | null;
 
-  @AllowNull(true) // Updated to allow null
+  @AllowNull(true)
   @Column({
     type: DataType.STRING,
     field: 'postal_code'
   })
-  postalCode: string | null; // Updated type to include null
+  postalCode: string | null;
 
-  @AllowNull(true) // Updated to allow null
+  @AllowNull(true)
   @Column({
     type: DataType.TEXT,
     field: 'delivery_options'
   })
-  deliveryOptions: string | null; // Updated type to include null
+  deliveryOptions: string | null;
 
   @Default(false)
   @Column({
@@ -116,19 +121,19 @@ export class Advertisement extends Model<
   })
   contactName: string;
 
-  @AllowNull(true) // Updated to allow null
+  @AllowNull(true)
   @Column({
     type: DataType.STRING,
     field: 'contact_phone'
   })
-  contactPhone: string | null; // Updated type to include null
+  contactPhone: string | null;
 
-  @AllowNull(true) // Updated to allow null
+  @AllowNull(true)
   @Column({
     type: DataType.STRING,
     field: 'contact_email'
   })
-  contactEmail: string | null; // Updated type to include null
+  contactEmail: string | null;
 
   @Default(false)
   @Column({

@@ -7,17 +7,18 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { MailModule } from './modules/mail/mail.module';
 import { AdvertisementModule } from './modules/advertisement/advertisement.module';
+import { SeederModule } from './database/seeders/subcategory.seeders.module';
 
 @Module({
   imports: [
     DatabaseModule,
     ConfigModule.forRoot({ isGlobal: true }),
-    AdvertisementModule,
     UsersModule,
     AuthModule,
     ChatModule,
     MailModule,
-
+    AdvertisementModule,
+    SeederModule,
   ],
 })
 export class AppModule {}

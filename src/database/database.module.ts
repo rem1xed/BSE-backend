@@ -1,12 +1,14 @@
+//database.module.ts
+
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from '../modules/users/models/users.model';
 import { Advertisement } from 'src/modules/advertisement/models/advertisement.model';
+import { UserLike } from 'src/modules/advertisement/models/user-like.model';
 import { AdImage } from 'src/modules/advertisement/models/ad-image.model';
 import { AdAttribute } from 'src/modules/advertisement/models/ad-attribute.model';
 import { Subcategory } from 'src/modules/advertisement/models/subcategory.model';
-import { UserLike } from 'src/modules/advertisement/models/user-like.model';
 
 @Module({
   imports: [
@@ -21,7 +23,13 @@ import { UserLike } from 'src/modules/advertisement/models/user-like.model';
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
-        models: [User, Advertisement, AdImage, AdAttribute, UserLike, Subcategory],
+        models: [
+          User, 
+          Advertisement, 
+          UserLike, 
+          AdImage, 
+          AdAttribute, 
+          Subcategory, ],
         autoLoadModels: true,
         synchronize: true,
       }),

@@ -17,7 +17,8 @@ import { UsersModule } from '../users/users.module';
 import { User } from '../users/models/users.model';
 
 @Module({
-  imports: [SequelizeModule.forFeature([
+  imports: [
+  SequelizeModule.forFeature([
   Advertisement,
   User,
   AdImage,
@@ -25,7 +26,6 @@ import { User } from '../users/models/users.model';
   UserLike,
   Subcategory
   ]),
-    
     MulterModule.register({
       storage: diskStorage({
         destination: './uploads/ads',
@@ -35,10 +35,10 @@ import { User } from '../users/models/users.model';
         },
       }),
     }),
-    UsersModule
+        UsersModule,
   ],
   controllers: [AdvertisementController],
   providers: [AdvertisementService],
-  exports: [AdvertisementService, SequelizeModule],
+  exports: [AdvertisementService],
 })
 export class AdvertisementModule {}

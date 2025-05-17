@@ -25,6 +25,8 @@ export class AdvertisementService {
   constructor(
     @InjectModel(Advertisement)
     private advertisementModel: typeof Advertisement,
+    @InjectModel(Subcategory)
+    private subcategoryModel: typeof Subcategory,
     @InjectModel(AdImage)
     private adImageModel: typeof AdImage,
     @InjectModel(AdAttribute)
@@ -37,6 +39,12 @@ export class AdvertisementService {
 
   
 async create(userId: number, createAdDto: CreateAdvertisementDto): Promise<Advertisement> {
+  
+  const subcategory = await this.subcategoryModel.findByPk(createAdDto.subcategoryId);
+  if (!subcategory) {
+    throw new BadRequestException(`Subcategory with ID ${createAdDto.subcategoryId} does not exist`);
+  }
+
   const result = await this.sequelize.transaction(async (t: Transaction) => {
     const {
       title,

@@ -1,4 +1,3 @@
-//users.model.ts
 import {
   Table,
   Column,
@@ -11,9 +10,9 @@ import {
   HasMany,
   BelongsToMany
 } from 'sequelize-typescript';
-import { Advertisement } from 'src/modules/advertisement/models/advertisement.model';
 import { UserCreationAttributes } from '../dto/register.dto';
-import { UserLike } from 'src/modules/advertisement/models/user-like.model';
+import { UserLike } from '../../advertisement/models/user-like.model';
+import { Advertisement } from 'src/modules/advertisement/models/advertisement.model';
 
 @Table
 export class User extends Model<User, UserCreationAttributes> {
@@ -64,8 +63,8 @@ export class User extends Model<User, UserCreationAttributes> {
   declare resetTokenExpires: Date | null;
   
   @HasMany(() => Advertisement)
-  advertisements?: Advertisement[];
+  advertisements: Advertisement[];
 
-  @BelongsToMany(() => require('src/modules/advertisement/models/advertisement.model').Advertisement, () => UserLike)
+  @BelongsToMany(() => Advertisement, () => UserLike)
   likedAdvertisements: Advertisement[];
 }

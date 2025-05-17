@@ -24,7 +24,10 @@ export class Subcategory extends Model {
   })
   declare id: number;
 
-  @Column(DataType.STRING)
+  @Column(({
+    type: DataType.STRING,
+    allowNull: false // Make name required
+  }))
   name: string;
 
   @Column({
