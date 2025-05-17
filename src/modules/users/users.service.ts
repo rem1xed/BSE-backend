@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { User } from './users.model';
+import { User } from './models/users.model';
 import { UserCreationAttributes } from './dto/register.dto';
 import * as bcrypt from 'bcryptjs';  // Змінено з bcrypt на bcryptjs
 

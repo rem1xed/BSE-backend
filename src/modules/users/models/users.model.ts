@@ -1,3 +1,4 @@
+//users.model.ts
 import {
   Table,
   Column,
@@ -7,9 +8,12 @@ import {
   AutoIncrement,
   Unique,
   AllowNull,
+  HasMany,
+  BelongsToMany
 } from 'sequelize-typescript';
-
-import { UserCreationAttributes } from './dto/register.dto';
+import { Advertisement } from 'src/modules/advertisement/models/advertisement.model';
+import { UserCreationAttributes } from '../dto/register.dto';
+import { UserLike } from 'src/modules/advertisement/models/user-like.model';
 
 @Table
 export class User extends Model<User, UserCreationAttributes> {
@@ -58,4 +62,10 @@ export class User extends Model<User, UserCreationAttributes> {
 
   @Column(DataType.DATE)
   declare resetTokenExpires: Date | null;
+  
+  @HasMany(() => Advertisement)
+  advertisements?: Advertisement[];
+
+  @BelongsToMany(() => require('src/modules/advertisement/models/advertisement.model').Advertisement, () => UserLike)
+  likedAdvertisements: Advertisement[];
 }

@@ -12,7 +12,7 @@ import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetToken } from './models/reset-token.model';
 
-import { User } from '../users/users.model';
+import { User } from '../users/models/users.model';
 
 @Injectable()
 export class AuthService {
