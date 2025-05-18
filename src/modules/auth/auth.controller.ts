@@ -4,12 +4,10 @@ import { Controller,
   UseGuards,
   Get,
   Req,
-  Res,
-  UnauthorizedException,
   HttpCode,
   HttpStatus, 
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -17,7 +15,6 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
-import { LocalAuthGuard } from './guards/local-auth.guard';
 
 @Controller('auth')
 export class AuthController {
