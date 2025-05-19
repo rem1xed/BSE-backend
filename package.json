@@ -32,6 +32,7 @@
     "@nestjs/sequelize": "^11.0.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
+    "bse-backend": "link:",
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.7",
     "google-auth-library": "^9.15.1",

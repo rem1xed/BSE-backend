@@ -6,7 +6,6 @@ import { OAuth2Client, UserRefreshClient, GoogleAuth } from 'google-auth-library
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { IMeetingResponse } from './meet.interface';
-import process from 'process';
 
 @Injectable()
 export class MeetService {
