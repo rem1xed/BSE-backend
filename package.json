@@ -20,8 +20,10 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@google-apps/meet": "^0.6.0",
+    "@google-cloud/local-auth": "^2.1.1",
     "@nestjs-modules/mailer": "^2.0.2",
-    "@nestjs/common": "^11.0.13",
+    "@nestjs/common": "^11.1.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.13",
     "@nestjs/jwt": "^11.0.0",
@@ -32,6 +34,7 @@
     "bcryptjs": "^3.0.2",
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.7",
+    "google-auth-library": "^9.15.1",
     "mailer": "^0.6.7",
     "nodemailer": "^6.10.0",
     "nodemailer-stub-transport": "^1.1.0",
@@ -56,7 +59,8 @@
     "@swc/core": "^1.10.7",
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.10.7",
+    "@types/json-schema": "^7.0.15",
+    "@types/node": "^22.15.19",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -88,6 +92,11 @@
       "**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "pnpm": {
+      "overrides": {
+        "google-auth-library": "^9.15.1"
+      }
+    }
   }
 }
