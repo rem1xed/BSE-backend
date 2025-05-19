@@ -6,8 +6,7 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { MailModule } from './modules/mail/mail.module';
-import { AdvertisementModule } from './modules/advertisement/advertisement.module';
-import { SeederModule } from './database/seeders/subcategory.seeders.module';
+import { UsersSettingsModule } from './modules/user-settings/user-settings.module';
 
 @Module({
   imports: [
@@ -17,8 +16,7 @@ import { SeederModule } from './database/seeders/subcategory.seeders.module';
     AuthModule,
     ChatModule,
     MailModule,
-    AdvertisementModule,
-    SeederModule,
+    UsersSettingsModule
   ],
 })
 export class AppModule {}

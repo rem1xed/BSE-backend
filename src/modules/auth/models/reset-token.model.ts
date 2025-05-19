@@ -1,7 +1,7 @@
 // src/modules/auth/models/reset-token.model.ts
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
-@Table({ tableName: 'reset_tokens' })
+@Table({ tableName: 'ResetTokens' })
 export class ResetToken extends Model {
   @Column({
     type: DataType.STRING,
