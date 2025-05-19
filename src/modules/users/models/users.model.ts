@@ -62,9 +62,11 @@ export class User extends Model<User, UserCreationAttributes> {
   @Column(DataType.DATE)
   declare resetTokenExpires: Date | null;
   
-  @HasMany(() => Advertisement)
-  advertisements: Advertisement[];
-
+  @HasMany(() => Advertisement, {
+  foreignKey: 'authorId',
+  as: 'authoredAdvertisements' // <-- unique alias
+})
+authoredAdvertisements: Advertisement[];
   @BelongsToMany(() => Advertisement, () => UserLike)
   likedAdvertisements: Advertisement[];
 }

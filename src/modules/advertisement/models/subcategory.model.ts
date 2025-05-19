@@ -1,5 +1,3 @@
-//subcategory.model.ts
-
 import {
   Table,
   Column,
@@ -7,14 +5,16 @@ import {
   DataType,
   PrimaryKey,
   AutoIncrement,
-  HasMany
+  HasMany,
+  CreatedAt,
+  UpdatedAt
 } from 'sequelize-typescript';
 import { Advertisement } from './advertisement.model';
 
-// This is a simplified model for the Subcategory
-// You may need to extend it based on your actual schema
-
-@Table
+@Table({
+  tableName: 'Subcategory',
+  timestamps: true
+})
 export class Subcategory extends Model {
   @PrimaryKey
   @AutoIncrement
@@ -24,19 +24,30 @@ export class Subcategory extends Model {
   })
   declare id: number;
 
-  @Column(({
+  @Column({
     type: DataType.STRING,
-    allowNull: false // Make name required
-  }))
+    allowNull: false
+  })
   name: string;
 
   @Column({
     type: DataType.INTEGER,
-    field: 'category_id'
+    field: 'category_id',
+    allowNull: false
   })
   categoryId: number;
 
-  @HasMany(() => Advertisement)
-  advertisements: Advertisement[];
-  
+  @CreatedAt
+  @Column
+  declare createdAt: Date;
+
+  @UpdatedAt
+  @Column
+  declare updatedAt: Date;
+
+  @HasMany(() => Advertisement, {
+  foreignKey: 'subcategoryId',
+  as: 'subcategoryAdvertisements' // <-- unique alias
+  })
+  subcategoryAdvertisements: Advertisement[];
 }

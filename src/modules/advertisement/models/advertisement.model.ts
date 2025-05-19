@@ -193,18 +193,29 @@ export class Advertisement extends Model {
   })
   expirationDate: Date;
 
-  @BelongsTo(() => Subcategory, 'subcategoryId')
+  @BelongsTo(() => Subcategory, {
+    foreignKey: 'subcategoryId',
+    as: 'subcategory'
+  })
   subcategory: Subcategory;
 
-  @HasMany(() => AdImage)
-  images: AdImage[];
-
-  @BelongsTo(() => User, 'authorId')
+  @BelongsTo(() => User, {
+    foreignKey: 'authorId',
+    as: 'author'
+  })
   author: User;
 
-  @BelongsToMany(() => User, () => UserLike, 'adId', 'userId')
+  @BelongsToMany(() => User, {
+    through: () => UserLike,
+    foreignKey: 'adId',
+    otherKey: 'userId',
+    as: 'likedByUsers'
+  })
   likedByUsers: User[];
 
-  @HasMany(() => AdAttribute)
+  @HasMany(() => AdAttribute, {
+    foreignKey: 'adId',
+    as: 'attributes'
+  })
   attributes: AdAttribute[];
 }
