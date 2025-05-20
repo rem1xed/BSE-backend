@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { MailModule } from './modules/mail/mail.module';
 import { AdvertisementModule } from './modules/advertisement/advertisement.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AdvertisementModule } from './modules/advertisement/advertisement.modul
     AuthModule,
     ChatModule,
     MailModule,
+    AdminModule
   ],
 })
 export class AppModule { }

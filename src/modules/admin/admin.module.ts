@@ -9,17 +9,23 @@ import { Chat } from '../chat/models/chat.model';
 import { Message } from '../chat/message/message.model';
 import { AdminRoleGuard } from './guards/admin-role.guard';
 import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     SequelizeModule.forFeature([User, Advertisement, Admin, Chat, Message]),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '8h' },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get('JWT_SECRET') || 'default_secret_key',
+        signOptions: { expiresIn: '8h' },
+      }),
     }),
   ],
   controllers: [AdminController],
   providers: [AdminService, AdminRoleGuard],
   exports: [AdminService],
 })
-export class AdminModule {}
+export class AdminModule { }

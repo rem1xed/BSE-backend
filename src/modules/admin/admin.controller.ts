@@ -84,6 +84,6 @@ import {
       @Body('password') password: string,
       @Body('secretKey') secretKey: string,
     ) {
-      return this.adminService.createAdminUser(email, password, secretKey);
+      return this.adminService.createAdminUser(email, password , secretKey);
     }
   }
