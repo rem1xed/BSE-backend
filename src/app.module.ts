@@ -10,14 +10,13 @@ import { AdvertisementModule } from './modules/advertisement/advertisement.modul
 
 @Module({
   imports: [
-    DatabaseModule,
     ConfigModule.forRoot({ isGlobal: true }),
-    AdvertisementModule,
+    DatabaseModule,
     UsersModule,
+    AdvertisementModule,
     AuthModule,
     ChatModule,
     MailModule,
-
   ],
 })
-export class AppModule {}
+export class AppModule { }

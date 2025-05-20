@@ -9,7 +9,7 @@ import { AdImage } from '../modules/advertisement/models/ad-image.model';
 import { AdAttribute } from '../modules/advertisement/models/ad-attribute.model';
 import { Subcategory } from '../modules/advertisement/models/subcategory.model';
 import { UserLike } from '../modules/advertisement/models/user-like.model';
-import { AdvertisementService } from 'src/modules/advertisement/advertisement.service';
+import { Admin } from 'src/modules/admin/admin.model';
 
 @Module({
   imports: [
@@ -24,7 +24,7 @@ import { AdvertisementService } from 'src/modules/advertisement/advertisement.se
         username: configService.get<string>('DB_USER'),
         password: configService.get<string>('DB_PASS'),
         database: configService.get<string>('DB_NAME'),
-        models: [User, Advertisement, AdImage, AdAttribute, UserLike, Subcategory],
+        models: [Admin, User, Advertisement, AdImage, AdAttribute, UserLike, Subcategory],
         autoLoadModels: true,
         synchronize: true,
         // Додано наступні параметри для більшої стабільності
@@ -40,4 +40,4 @@ import { AdvertisementService } from 'src/modules/advertisement/advertisement.se
   ],
   exports: [SequelizeModule], // Важливо експортувати SequelizeModule
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

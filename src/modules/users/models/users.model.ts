@@ -1,4 +1,3 @@
-//users.model.ts
 import {
   Table,
   Column,
@@ -11,9 +10,9 @@ import {
   HasMany,
   BelongsToMany
 } from 'sequelize-typescript';
-import { Advertisement } from 'src/modules/advertisement/models/advertisement.model';
 import { UserCreationAttributes } from '../dto/register.dto';
-import { UserLike } from 'src/modules/advertisement/models/user-like.model';
+import { Advertisement } from '../../advertisement/models/advertisement.model';
+import { UserLike } from '../../advertisement/models/user-like.model';
 
 @Table
 export class User extends Model<User, UserCreationAttributes> {
@@ -23,17 +22,11 @@ export class User extends Model<User, UserCreationAttributes> {
   declare id: number;
 
   @AllowNull(false)
-  @Column( {
-    type: DataType.STRING,
-    field: 'firstName'
-  })
+  @Column({ type: DataType.STRING, field: 'firstName' })
   declare firstName: string;
 
   @AllowNull(false)
-  @Column( {
-    type: DataType.STRING,
-    field: 'lastName'
-  })
+  @Column({ type: DataType.STRING, field: 'lastName' })
   declare lastName: string;
 
   @Unique
@@ -51,10 +44,7 @@ export class User extends Model<User, UserCreationAttributes> {
   declare password: string;
 
   @AllowNull(false)
-  @Column({
-    type: DataType.FLOAT,
-    defaultValue: 0,
-  })
+  @Column({ type: DataType.FLOAT, defaultValue: 0 })
   declare bonuses: number;
 
   @Column(DataType.STRING)
@@ -66,14 +56,12 @@ export class User extends Model<User, UserCreationAttributes> {
   @HasMany(() => Advertisement)
   advertisements?: Advertisement[];
 
-  @BelongsToMany(() => require('src/modules/advertisement/models/advertisement.model').Advertisement, () => UserLike)
+  @BelongsToMany(() => Advertisement, () => UserLike)
   likedAdvertisements: Advertisement[];
 
   @Column({ type: DataType.BOOLEAN, defaultValue: false })
-isBanned: boolean;
+  isBanned: boolean;
 
-@Column({ type: DataType.STRING })
-role: string; // або ENUM, якщо є ролі 'user', 'admin' і т.д.
-
-
+  @Column({ type: DataType.STRING })
+  role: string;
 }

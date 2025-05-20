@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -36,10 +36,10 @@ import { UsersModule } from '../users/users.module';
         },
       }),
     }),
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
   controllers: [AdvertisementController],
   providers: [AdvertisementService],
-  exports: [AdvertisementService, SequelizeModule],
+  exports: [AdvertisementService],
 })
-export class AdvertisementModule {}
+export class AdvertisementModule { }
