@@ -9,6 +9,7 @@ import { AdImage } from '../modules/advertisement/models/ad-image.model';
 import { AdAttribute } from '../modules/advertisement/models/ad-attribute.model';
 import { Subcategory } from '../modules/advertisement/models/subcategory.model';
 import { UserLike } from '../modules/advertisement/models/user-like.model';
+import { AdvertisementService } from 'src/modules/advertisement/advertisement.service';
 
 @Module({
   imports: [
