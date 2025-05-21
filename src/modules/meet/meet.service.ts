@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { authenticate } from '@google-cloud/local-auth';
 import { SpacesServiceClient } from '@google-apps/meet';
-import { OAuth2Client, UserRefreshClient, GoogleAuth } from 'google-auth-library';
+import {
+  OAuth2Client,
+  UserRefreshClient,
+  GoogleAuth,
+} from 'google-auth-library';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { IMeetingResponse } from './meet.interface';
@@ -10,34 +14,42 @@ import { IMeetingResponse } from './meet.interface';
 @Injectable()
 export class MeetService {
   private readonly logger = new Logger(MeetService.name);
-  private readonly SCOPES = ['https://www.googleapis.com/auth/meetings.space.created'];
+  private readonly SCOPES = [
+    'https://www.googleapis.com/auth/meetings.space.created',
+  ];
   private readonly TOKEN_PATH: string;
   private readonly CREDENTIALS_PATH: string;
 
-  constructor(
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly configService: ConfigService) {
     this.TOKEN_PATH = path.join(process.cwd(), 'token.json');
     this.CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
   }
 
-  async createMeetingForUsers(user1Id: number, user2Id: number): Promise<IMeetingResponse> {
+  async createMeetingForUsers(
+    user1Id: number,
+    user2Id: number,
+  ): Promise<IMeetingResponse> {
     try {
       const authClient = await this.authorize();
+
+      console.log('authClient:', authClient);
       if (!authClient) {
         throw new Error('Failed to authorize with Google');
       }
       const meetUrl = await this.createSpace(authClient);
+
+      console.log('Meeting URL:', meetUrl);
+
       return {
         meetingUri: meetUrl,
-        status: 'created'
+        status: 'created',
       };
     } catch (error) {
       this.logger.error('Failed to create meeting:', error);
       return {
         meetingUri: '',
         status: 'failed',
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -49,8 +61,10 @@ export class MeetService {
       const client = new OAuth2Client(
         credentials.client_id,
         credentials.client_secret,
-        credentials.redirect_uris ? credentials.redirect_uris[0] : undefined
+        credentials.redirect_uris ? credentials.redirect_uris[0] : undefined,
       );
+
+      console.log('Loaded credentials:', credentials);
       client.setCredentials({ refresh_token: credentials.refresh_token });
       return client;
     } catch (err) {
@@ -64,6 +78,7 @@ export class MeetService {
       const content = await fs.readFile(this.CREDENTIALS_PATH, 'utf-8');
       const keys = JSON.parse(content);
       const key = keys.installed || keys.web;
+
       const payload = JSON.stringify({
         type: 'authorized_user',
         client_id: key.client_id,
@@ -100,7 +115,7 @@ export class MeetService {
         const tempClient = new OAuth2Client(
           key.client_id,
           key.client_secret,
-          key.redirect_uris ? key.redirect_uris[0] : undefined
+          key.redirect_uris ? key.redirect_uris[0] : undefined,
         );
         tempClient.setCredentials(auth.credentials);
         await this.saveCredentials(tempClient);
@@ -118,7 +133,7 @@ export class MeetService {
       client = new OAuth2Client(
         key.client_id,
         key.client_secret,
-        key.redirect_uris ? key.redirect_uris[0] : undefined
+        key.redirect_uris ? key.redirect_uris[0] : undefined,
       );
       client.setCredentials({ refresh_token: refreshToken });
 
@@ -132,11 +147,11 @@ export class MeetService {
   private async createSpace(authClient: OAuth2Client): Promise<string> {
     try {
       const googleAuth = new GoogleAuth({
-        scopes: this.SCOPES
+        scopes: this.SCOPES,
       });
-      
+
       googleAuth.cachedCredential = authClient;
-      
+
       const meetClient = new SpacesServiceClient({
         _authClient: googleAuth,
         get authClient() {
@@ -148,6 +163,7 @@ export class MeetService {
       });
 
       const request = {};
+
       const response = await meetClient.createSpace(request);
       const meetingUri = response[0]?.meetingUri;
 
