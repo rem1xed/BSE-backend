@@ -1,11 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Redirect } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { authenticate } from '@google-cloud/local-auth';
-import { SpacesServiceClient } from '@google-apps/meet';
+import { google, Auth } from 'googleapis';
 import {
   OAuth2Client,
   UserRefreshClient,
   GoogleAuth,
+  AuthClient,
+  auth,
 } from 'google-auth-library';
 import * as fs from 'fs/promises';
 import * as path from 'path';
@@ -15,8 +17,10 @@ import { IMeetingResponse } from './meet.interface';
 export class MeetService {
   private readonly logger = new Logger(MeetService.name);
   private readonly SCOPES = [
-    'https://www.googleapis.com/auth/meetings.space.created',
-  ];
+  'https://www.googleapis.com/auth/meetings.space.created',
+  'https://www.googleapis.com/auth/calendar.events',
+  'https://www.googleapis.com/auth/calendar'
+];
   private readonly TOKEN_PATH: string;
   private readonly CREDENTIALS_PATH: string;
 
@@ -58,17 +62,21 @@ export class MeetService {
     try {
       const content = await fs.readFile(this.TOKEN_PATH, 'utf-8');
       const credentials = JSON.parse(content);
+      
       const client = new OAuth2Client(
         credentials.client_id,
         credentials.client_secret,
         credentials.redirect_uris ? credentials.redirect_uris[0] : undefined,
       );
 
-      console.log('Loaded credentials:', credentials);
-      client.setCredentials({ refresh_token: credentials.refresh_token });
+      client.setCredentials({
+        refresh_token: credentials.refresh_token,
+        access_token: credentials.access_token,
+        expiry_date: credentials.expiry_date
+      });
+
       return client;
     } catch (err) {
-      this.logger.debug('No saved credentials found');
       return null;
     }
   }
@@ -96,7 +104,11 @@ export class MeetService {
     try {
       let client = await this.loadSavedCredentialsIfExist();
       if (client) {
-        this.logger.log('Loaded saved credentials');
+        // Add debug logging to verify credentials
+        this.logger.debug('Loaded credentials:', {
+          hasRefreshToken: !!client.credentials.refresh_token,
+          hasAccessToken: !!client.credentials.access_token,
+        });
         return client;
       }
 
@@ -104,74 +116,65 @@ export class MeetService {
       const auth = await authenticate({
         scopes: this.SCOPES,
         keyfilePath: this.CREDENTIALS_PATH,
+
       });
 
-      this.logger.log('OAuth flow complete, credentials:', auth.credentials);
-
-      if (auth?.credentials?.refresh_token) {
-        const content = await fs.readFile(this.CREDENTIALS_PATH, 'utf-8');
-        const keys = JSON.parse(content);
-        const key = keys.installed || keys.web;
-        const tempClient = new OAuth2Client(
-          key.client_id,
-          key.client_secret,
-          key.redirect_uris ? key.redirect_uris[0] : undefined,
-        );
-        tempClient.setCredentials(auth.credentials);
-        await this.saveCredentials(tempClient);
-        this.logger.log('Saved new credentials with refresh_token');
-      } else {
-        this.logger.error('No refresh_token received from OAuth flow!');
+      if (!auth?.credentials?.refresh_token) {
+        throw new Error('No refresh_token received from OAuth flow!');
       }
 
       const content = await fs.readFile(this.CREDENTIALS_PATH, 'utf-8');
       const keys = JSON.parse(content);
       const key = keys.installed || keys.web;
 
-      const refreshToken = auth.credentials.refresh_token || '';
-
       client = new OAuth2Client(
         key.client_id,
         key.client_secret,
         key.redirect_uris ? key.redirect_uris[0] : undefined,
       );
-      client.setCredentials({ refresh_token: refreshToken });
+
+      // Set both refresh_token and access_token
+      client.setCredentials({
+        refresh_token: auth.credentials.refresh_token,
+        access_token: auth.credentials.access_token,
+        expiry_date: auth.credentials.expiry_date,
+      });
+
+      // Save credentials for future use
+      await this.saveCredentials(client);
 
       return client;
     } catch (error) {
       this.logger.error('Authorization failed:', error);
-      return null;
+      throw error; // Changed from return null to throw
     }
   }
 
   private async createSpace(authClient: OAuth2Client): Promise<string> {
     try {
-      const googleAuth = new GoogleAuth({
-        scopes: this.SCOPES,
-      });
+      // Force token refresh if needed
+      const isTokenExpired =
+        authClient.credentials.expiry_date
+          ? authClient.credentials.expiry_date < Date.now()
+          : true;
 
-      googleAuth.cachedCredential = authClient;
-
-      const meetClient = new SpacesServiceClient({
-        _authClient: googleAuth,
-        get authClient() {
-          return this._authClient;
-        },
-        set authClient(value) {
-          this._authClient = value;
-        },
-      });
-
-      const request = {};
-
-      const response = await meetClient.createSpace(request);
-      const meetingUri = response[0]?.meetingUri;
-
-      if (!meetingUri) {
-        throw new Error('Failed to create meeting space');
+      if (isTokenExpired) {
+        this.logger.debug('Token expired, refreshing...');
+        await authClient.getAccessToken();
       }
 
-      return meetingUri;
+      const meet = google.meet({
+        version: 'v2',
+        auth: authClient,
+      });
+
+      const response = await meet.spaces.create({});
+
+      if (!response?.data?.meetingUri) {
+        throw new Error('No meeting URI received from Google Meet API');
+      }
+
+      return response.data.meetingUri;
     } catch (error) {
       this.logger.error('Failed to create meeting space:', error);
       throw error;
