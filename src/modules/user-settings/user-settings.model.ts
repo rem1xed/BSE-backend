@@ -5,7 +5,7 @@ import {
   Model,
   Table,
 } from 'sequelize-typescript';
-import { User } from '../users/users.model';
+import { User } from '../users/models/users.model';
 import { SettingsDto } from './dto/settings.dto';
 
 @Table({ tableName: 'UserSettings' })
