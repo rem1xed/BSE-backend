@@ -8,8 +8,8 @@ export class MeetController {
   @Get('test')
   async testMeet(
     
-    @Query('user1') user1: number,
-    @Query('user2') user2: number
+    @Query('user1', ParseIntPipe) user1: number,
+    @Query('user2', ParseIntPipe) user2: number
   ) {
     // Optionally, you could fetch user details here using a UsersService
     // and pass user objects to MeetService if needed.

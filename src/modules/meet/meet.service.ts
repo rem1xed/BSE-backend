@@ -81,18 +81,19 @@ export class MeetService {
     try {
       let client = await this.loadSavedCredentialsIfExist();
       if (client) {
+        this.logger.log('Loaded saved credentials');
         return client;
       }
 
-      // Authenticate and get OAuth2Client
+      this.logger.log('No saved credentials, starting OAuth flow...');
       const auth = await authenticate({
         scopes: this.SCOPES,
         keyfilePath: this.CREDENTIALS_PATH,
       });
 
-      // Save refresh token
+      this.logger.log('OAuth flow complete, credentials:', auth.credentials);
+
       if (auth?.credentials?.refresh_token) {
-        // Create a new OAuth2Client instance with credentials from auth
         const content = await fs.readFile(this.CREDENTIALS_PATH, 'utf-8');
         const keys = JSON.parse(content);
         const key = keys.installed || keys.web;
@@ -103,14 +104,15 @@ export class MeetService {
         );
         tempClient.setCredentials(auth.credentials);
         await this.saveCredentials(tempClient);
+        this.logger.log('Saved new credentials with refresh_token');
+      } else {
+        this.logger.error('No refresh_token received from OAuth flow!');
       }
 
-      // Read client_id and client_secret from credentials.json
       const content = await fs.readFile(this.CREDENTIALS_PATH, 'utf-8');
       const keys = JSON.parse(content);
       const key = keys.installed || keys.web;
 
-      // Use refresh_token from auth.credentials
       const refreshToken = auth.credentials.refresh_token || '';
 
       client = new OAuth2Client(
@@ -129,12 +131,10 @@ export class MeetService {
 
   private async createSpace(authClient: OAuth2Client): Promise<string> {
     try {
-      // Create a GoogleAuth instance using the OAuth2Client
       const googleAuth = new GoogleAuth({
         scopes: this.SCOPES
       });
       
-      // Set the client to use
       googleAuth.cachedCredential = authClient;
       
       const meetClient = new SpacesServiceClient({
