@@ -16,9 +16,12 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResetToken } from './models/reset-token.model';
+<<<<<<< HEAD
 import { User } from '../users/models/users.model';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../mail/mail.service';
+=======
+>>>>>>> a85bcd8ab504fc85bc59dfb2cb34f2cd2faaf684
 
 @Injectable()
 export class AuthService {

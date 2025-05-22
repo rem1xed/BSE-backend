@@ -6,8 +6,9 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { MailModule } from './modules/mail/mail.module';
+import { UsersSettingsModule } from './modules/user-settings/user-settings.module';
+import { MeetModule } from './modules/meet/meet.module';
 import { AdvertisementModule } from './modules/advertisement/advertisement.module';
-import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { AdminModule } from './modules/admin/admin.module';
     AuthModule,
     ChatModule,
     MailModule,
-    AdminModule
-  ],
+    UsersSettingsModule,
+    MeetModule,
+  ]
 })
 export class AppModule { }
