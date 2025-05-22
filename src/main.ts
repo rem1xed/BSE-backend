@@ -13,6 +13,8 @@ async function bootstrap() {
     credentials: true, // Для підтримки cookies
   });
 
+   console.log('ENV loaded ADMIN_SECRET_KEY =', process.env.ADMIN_SECRET_KEY);
+
   await app.listen(1488); // Порт бекенду
 }
 bootstrap();
