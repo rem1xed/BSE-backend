@@ -21,13 +21,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     MailModule,
     ConfigModule.forRoot(),
     JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: jwtConstants.secret,
-        signOptions: { expiresIn: '24h' },
-      }),
-    })
+    imports: [ConfigModule],
+    inject: [ConfigService],
+    useFactory: (configService: ConfigService) => ({
+      secret: configService.get<string>('JWT_SECRET'),
+      signOptions: { expiresIn: '24h' },
+    }),
+  }),
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy,...authProviders],
   controllers: [AuthController],

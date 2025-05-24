@@ -5,10 +5,11 @@ import {
   UseGuards,
   Get,
   Req,
+  Res,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -22,8 +23,16 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(@Res({ passthrough: true }) res: Response, @Body() loginDto: LoginDto) {
+    const jwt = await this.authService.login(loginDto); // отримаєш токен
+    res.cookie('auth_token', jwt.auth_token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: (24 * 60 * 60 * 1000) * 7, // 7 днів
+      path: '/',
+    });
+    return { user: jwt.user }; // можна віддати користувача без токена в тілі
   }
 
   @Post('register')
@@ -56,5 +65,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   getProfile(@Req() req: Request) {
     return (req as any).user;
+  }
+
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    return this.authService.logout(res);
   }
 }
