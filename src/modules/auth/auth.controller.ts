@@ -1,11 +1,12 @@
-import { Controller,
+import { 
+  Controller,
   Post,
   Body,
   UseGuards,
   Get,
   Req,
   HttpCode,
-  HttpStatus, 
+  HttpStatus,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
@@ -51,7 +52,6 @@ export class AuthController {
     return { message: 'Пароль успішно змінено' };
   }
 
-  // 🆕 Перевірка залогіненого користувача
   @Get('me')
   @UseGuards(JwtAuthGuard)
   getProfile(@Req() req: Request) {
