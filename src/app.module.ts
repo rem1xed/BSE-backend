@@ -6,6 +6,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { MailModule } from './modules/mail/mail.module';
 import { UsersSettingsModule } from './modules/user-settings/user-settings.module';
+import { MeetModule } from './modules/meet/meet.module';
 
 @Module({
   imports: [
@@ -15,7 +16,8 @@ import { UsersSettingsModule } from './modules/user-settings/user-settings.modul
     AuthModule,
     ChatModule,
     MailModule,
-    UsersSettingsModule
-  ],
+    UsersSettingsModule,
+    MeetModule,
+  ]
 })
 export class AppModule {}
