@@ -23,7 +23,6 @@ export class AuthService {
   ) {}
 
   async login(user: LoginDto) {
-
     console.log("Login dto : ", user);
 
     const email = user.email || user['email'];
@@ -34,16 +33,22 @@ export class AuthService {
         throw new BadRequestException("Wrong password !");
     }
 
-    const payload = { email: validatedUser.email, sub: validatedUser.id };
+    // Create payload matching the structure in JwtStrategy's validate method
+    const payload = { 
+      sub: validatedUser.id, 
+      email: validatedUser.email,
+      firstName: validatedUser.firstName, 
+      lastName: validatedUser.lastName,
+      phone: validatedUser.phone, 
+    };
 
     return {
-      user : validatedUser,
+      user: validatedUser,
       access_token: this.jwtService.sign(payload),
     };
   }
 
   async validateUser(email: string, password: string): Promise<any> {
-
     console.log("VALIDATE email: ", email, "password",  password);
 
     const user = await this.usersService.findByEmail(email);
@@ -52,7 +57,6 @@ export class AuthService {
       return null;
     }
     
-
     if (!user.password) {
       console.log('Користувач знайдений, але пароль відсутній:', user.email);
       return null; // або throw new Error('User has no password set');
@@ -101,8 +105,14 @@ export class AuthService {
     // Видаляємо пароль з відповіді
     const { password, ...result } = newUser.toJSON();
     
-    // Генеруємо JWT
-    const payload = { email: result.email, sub: result.id };
+    // Генеруємо JWT з повним набором даних
+    const payload = { 
+      sub: result.id, 
+      email: result.email,
+      firstName: result.firstName,
+      lastName: result.lastName,
+      phone: result.phone
+    };
     
     return {
       user: result,
@@ -110,7 +120,7 @@ export class AuthService {
     };
   }
 
-    async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
     const { email } = forgotPasswordDto;
     const user = await this.usersService.findByEmail(email);
     
@@ -157,7 +167,6 @@ export class AuthService {
       throw new BadRequestException('Недійсний або прострочений код');
     }
 
-    
     return true;
   }
 
