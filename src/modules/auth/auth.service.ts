@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
@@ -44,7 +45,7 @@ export class AuthService {
 
     return {
       user: validatedUser,
-      access_token: this.jwtService.sign(payload),
+      auth_token: this.jwtService.sign(payload),
     };
   }
 
@@ -116,7 +117,7 @@ export class AuthService {
     
     return {
       user: result,
-      accessToken: this.jwtService.sign(payload),
+      auth_token: this.jwtService.sign(payload),
     };
   }
 
@@ -195,5 +196,15 @@ export class AuthService {
     // Позначаємо токен як використаний
     resetToken.isUsed = true;
     await resetToken.save();
+  }
+
+  logout(res: Response) {
+    res.clearCookie('auth_token', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    });
+
+    return { message: 'Logged out successfully' };
   }
 }
