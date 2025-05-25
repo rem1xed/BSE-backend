@@ -17,11 +17,43 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
+import { AdminLoginDto } from './dto/adminLogin.dto';
+import { AdminRegisterDto } from './dto/adminRegister.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+
+  //ADMIN END-POINTS
+
+
+  @Post('admin-login')
+  async adminLogin(@Res({ passthrough: true }) res: Response, @Body() adminLoginDto: AdminLoginDto) {
+    const jwt = await this.authService.adminLogin(adminLoginDto); // отримаєш токен
+    res.cookie('auth_admin_token', jwt.auth_admin_token, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: (24 * 60 * 60 * 1000) * 1, // 1 день
+      path: '/',
+    });
+    return { user: jwt.user }; // можна віддати користувача без токена в тілі
+  }
+
+  @Post('admin-register')
+  async adminRegister(@Body() adminRegisterDto: AdminRegisterDto) {
+    return this.authService.register(adminRegisterDto);
+  }
+
+  // @Post('admin-logout')
+  // adminLogout(@Res({ passthrough: true }) res: Response) {
+  //   return this.authService.logout(res);
+  // }
+
+  //USER END-POINTS
+  
+  
   @Post('login')
   async login(@Res({ passthrough: true }) res: Response, @Body() loginDto: LoginDto) {
     const jwt = await this.authService.login(loginDto); // отримаєш токен
