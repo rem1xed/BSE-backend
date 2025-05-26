@@ -1,22 +1,21 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
 import { UsersModule } from '../users/users.module';
 import { LocalStrategy } from './strategies/local.strategy';
-import { JwtUserStrategy } from './strategies/jwtUser.strategy';
-import { authProviders } from './auth.providers';
+import { JwtAdminStrategy } from './strategies/jwtAdmin.strategy';
+import { authProviders } from '../auth/auth.providers';
 import { MailModule } from '../mail/mail.module';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { ResetToken } from './models/reset-token.model';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AdminService } from './admin.service';
+import { AdminController } from './admin.controller';
 
 @Module({
   imports: [
     UsersModule,
     PassportModule,
-    SequelizeModule.forFeature([ResetToken]),
+    SequelizeModule,
     MailModule,
     ConfigModule.forRoot(),
     JwtModule.registerAsync({
@@ -28,8 +27,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   }),
   ],
-  providers: [AuthService, LocalStrategy, JwtUserStrategy,...authProviders],
-  controllers: [AuthController],
-  exports: [AuthService],
+  providers: [AdminService, LocalStrategy, JwtAdminStrategy,...authProviders],
+  controllers: [AdminController],
+  exports: [AdminService],
 })
-export class AuthModule {}
+export class AdminModule {}

@@ -2,10 +2,10 @@ import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/
 import { ChatService } from './chat.service';
 import { ChatResponseDto, CreateChatDto } from './dto/chat.dto'; 
 import { CreateMessageDto, MessageResponseDto } from './dto/message.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtUserGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('chats')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtUserGuard)
 export class ChatController {
   constructor(private chatService: ChatService) {}
 
