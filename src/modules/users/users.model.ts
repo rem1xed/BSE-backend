@@ -32,6 +32,20 @@ export class User extends Model<User, UserCreationAttributes> {
   })
   declare lastName: string;
 
+  @AllowNull(false)
+  @Column( {
+    type: DataType.STRING,
+    field: 'role'
+  })
+  declare role: string;
+
+  @AllowNull(true)
+  @Column( {
+    type: DataType.STRING,
+    field: 'key'
+  })
+  declare key: string;
+
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)

@@ -1,4 +1,4 @@
-import { 
+import {
   Controller,
   Post,
   Body,
@@ -13,7 +13,7 @@ import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtUserGuard } from './guards/jwt-auth.guard';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyCodeDto } from './dto/verify-code.dto';
@@ -22,17 +22,26 @@ import { VerifyCodeDto } from './dto/verify-code.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // ========== USER ENDPOINTS ==========
+
   @Post('login')
-  async login(@Res({ passthrough: true }) res: Response, @Body() loginDto: LoginDto) {
-    const jwt = await this.authService.login(loginDto); // отримаєш токен
+  async login(
+    @Res({ passthrough: true }) res: Response,
+    @Body() loginDto: LoginDto,
+  ) {
+    res.clearCookie('auth_admin_token');
+
+    const jwt = await this.authService.login(loginDto);
+
     res.cookie('auth_token', jwt.auth_token, {
       httpOnly: true,
       secure: false,
       sameSite: 'lax',
-      maxAge: (24 * 60 * 60 * 1000) * 7, // 7 днів
-      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 днів
+      path: '/', // кукі доступні для всього сайту
     });
-    return { user: jwt.user }; // можна віддати користувача без токена в тілі
+
+    return { user: jwt.user };
   }
 
   @Post('register')
@@ -42,33 +51,42 @@ export class AuthController {
 
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<{ message: string }> {
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<{ message: string }> {
     await this.authService.forgotPassword(forgotPasswordDto);
-    return { message: 'Код для скидання пароля надіслано на вашу електронну пошту' };
+    return {
+      message: 'Код для скидання пароля надіслано на вашу електронну пошту',
+    };
   }
 
   @Post('verify-code')
   @HttpCode(HttpStatus.OK)
-  async verifyCode(@Body() verifyCodeDto: VerifyCodeDto): Promise<{ valid: boolean }> {
+  async verifyCode(
+    @Body() verifyCodeDto: VerifyCodeDto,
+  ): Promise<{ valid: boolean }> {
     const valid = await this.authService.verifyCode(verifyCodeDto);
     return { valid };
   }
 
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
-  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<{ message: string }> {
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
     await this.authService.resetPassword(resetPasswordDto);
     return { message: 'Пароль успішно змінено' };
   }
 
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  getProfile(@Req() req: Request) {
-    return (req as any).user;
+  @UseGuards(JwtUserGuard)
+  @Get('me/user')
+  getUserProfile(@Req() req: Request) {
+    return req.user;
   }
 
   @Post('logout')
   logout(@Res({ passthrough: true }) res: Response) {
-    return this.authService.logout(res);
+    res.clearCookie('auth_token');
+    return { message: 'Вихід виконано' };
   }
 }

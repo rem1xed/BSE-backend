@@ -1,8 +1,7 @@
-import { Injectable, UnauthorizedException, BadRequestException, ConflictException, NotFoundException, Inject } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException, NotFoundException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { Response } from 'express';
-import { v4 as uuidv4 } from 'uuid';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { MailService } from '../mail/mail.service';
@@ -22,6 +21,8 @@ export class AuthService {
     @Inject('RESET_TOKEN_REPOSITORY')
     private resetTokenRepository: typeof ResetToken,
   ) {}
+
+  //USERS METHODS
 
   async login(user: LoginDto) {
     console.log("Login dto : ", user);
@@ -49,6 +50,8 @@ export class AuthService {
     };
   }
 
+  
+
   async validateUser(email: string, password: string): Promise<any> {
     console.log("VALIDATE email: ", email, "password",  password);
 
@@ -73,53 +76,51 @@ export class AuthService {
     return null;
   }
 
+  
+
   async register(registerDto: RegisterDto) {
     const { confirmPassword, ...userDto } = registerDto;
-    
-    // Перевірка чи паролі співпадають
+
     if (userDto.password !== confirmPassword) {
       throw new BadRequestException('Passwords do not match');
     }
-    
-    // Перевірка на існуючий email
+
     const existingEmail = await this.usersService.findByEmail(userDto.email);
     if (existingEmail) {
       throw new ConflictException('Email already exists');
     }
-    
-    // Перевірка на існуючий телефон
+
     const existingPhone = await this.usersService.findByPhone(userDto.phone);
     if (existingPhone) {
       throw new ConflictException('Phone number already exists');
     }
-    
-    // Хешування пароля
+
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(userDto.password, salt);
-    
-    // Створення користувача
+
     const newUser = await this.usersService.createUser({
       ...userDto,
       password: hashedPassword,
+      role: 'USER', // Примусово встановлюємо роль
+      key: undefined
     });
-    
-    // Видаляємо пароль з відповіді
+
     const { password, ...result } = newUser.toJSON();
-    
-    // Генеруємо JWT з повним набором даних
-    const payload = { 
-      sub: result.id, 
+
+    const payload = {
+      sub: result.id,
       email: result.email,
       firstName: result.firstName,
       lastName: result.lastName,
-      phone: result.phone
+      phone: result.phone,
     };
-    
+
     return {
       user: result,
       auth_token: this.jwtService.sign(payload),
     };
   }
+
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
     const { email } = forgotPasswordDto;
