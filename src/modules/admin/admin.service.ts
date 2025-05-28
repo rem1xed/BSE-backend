@@ -1,10 +1,11 @@
-import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { MailService } from '../mail/mail.service';
 import { AdminLoginDto } from './dto/login.dto';
 import { AdminRegisterDto } from './dto/register.dto';
+import { ContactForm } from './models/contactForm.model';
 
 @Injectable()
 export class AdminService {
@@ -12,6 +13,8 @@ export class AdminService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    @Inject('CONTACT_FORM_REPOSITORY')
+    private contactForm: typeof ContactForm,
   ) {}
 
   // ADMIN METHODS
@@ -115,5 +118,15 @@ export class AdminService {
       user: result,
       auth_admin_token: this.jwtService.sign(payload),
     };
+  }
+
+  async showAllForms(){
+    return await this.contactForm.findAll();
+  }
+
+  async createForm(data){
+    console.log(this.contactForm.count());
+    await this.contactForm.create({...data});
+    console.log(this.contactForm.count());
   }
 }
