@@ -12,10 +12,16 @@ import { AdminService } from '../admin/admin.service'
 import { JwtAdminGuard } from './guards/jwt-auth.guard';
 import { AdminLoginDto } from './dto/login.dto';
 import { AdminRegisterDto } from './dto/register.dto';
+import { MailService } from '../mail/mail.service';
+import { ContactFormDto } from './dto/contactForm.dto';
+import { UsersService } from '../users/users.service';
 
 @Controller('admin')
 export class AdminController {
-  constructor(private readonly authService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly mailService: MailService,
+    private readonly usersService: UsersService) {}
 
   // ========== ADMIN ENDPOINTS ==========
   // Додаємо префікс /admin для адмінських маршрутів
@@ -27,7 +33,7 @@ export class AdminController {
   ) {
     res.clearCookie('auth_token');
 
-    const jwt = await this.authService.adminLogin(adminLoginDto);
+    const jwt = await this.adminService.adminLogin(adminLoginDto);
 
     res.cookie('auth_admin_token', jwt.auth_admin_token, {
       httpOnly: true,
@@ -42,7 +48,7 @@ export class AdminController {
 
   @Post('register')
   async adminRegister(@Body() adminRegisterDto: AdminRegisterDto) {
-    return this.authService.registerAdmin(adminRegisterDto);
+    return this.adminService.registerAdmin(adminRegisterDto);
   }
 
   @UseGuards(JwtAdminGuard)
@@ -55,5 +61,26 @@ export class AdminController {
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('auth_admin_token', { path: '/' }); // потрібно врахувати path для очистки
     return { message: 'Вихід виконано' };
+  }
+
+
+  //  METHOD FOR SENDING QUESTIONS ETC TO ADMIN'S PANEL //
+
+  @Post('send')
+  async send(@Body() contactFormDto: ContactFormDto){
+    await this.adminService.createForm({...contactFormDto});
+    await this.mailService.sendContactForm({...contactFormDto});
+  }
+
+  @UseGuards(JwtAdminGuard)
+  @Get('get/contact-form')
+  async getContactForm(){
+    return await this.adminService.showAllForms();
+  }
+
+  @UseGuards(JwtAdminGuard)
+  @Get('get/users')
+  async getUsers(){
+    return await this.usersService.getAll();
   }
 }

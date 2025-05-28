@@ -70,4 +70,8 @@ export class UsersService {
       { where: { email } }
     );
   }
+
+  async getAll(){
+    return await this.userRepository.findAll({where:{role: 'USER'}});
+  }
 }
