@@ -8,6 +8,7 @@ import { MailModule } from './modules/mail/mail.module';
 import { UsersSettingsModule } from './modules/user-settings/user-settings.module';
 import { MeetModule } from './modules/meet/meet.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { AdvertisementModule } from './modules/advertisement/advertisement.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { AdminModule } from './modules/admin/admin.module';
     MailModule,
     UsersSettingsModule,
     MeetModule,
+    AdvertisementModule
   ]
 })
 export class AppModule {}
