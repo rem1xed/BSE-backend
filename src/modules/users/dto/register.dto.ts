@@ -4,6 +4,8 @@ export interface UserCreationAttributes {
   email: string;
   phone: string;
   password: string;
+  role?: string;
+  key?: string; // ← зробити необов'язковим
   // bonuses?: number;
   // resetToken?: string;
   // resetTokenExpires?: Date;

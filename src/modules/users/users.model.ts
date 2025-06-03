@@ -11,7 +11,6 @@ import {
 
 import { UserCreationAttributes } from './dto/register.dto';
 
-
 @Table
 export class User extends Model<User, UserCreationAttributes> {
   @PrimaryKey
@@ -20,37 +19,57 @@ export class User extends Model<User, UserCreationAttributes> {
   declare id: number;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
-  firstName: string;
+  @Column( {
+    type: DataType.STRING,
+    field: 'firstName'
+  })
+  declare firstName: string;
 
   @AllowNull(false)
-  @Column(DataType.STRING)
-  lastName: string;
+  @Column( {
+    type: DataType.STRING,
+    field: 'lastName'
+  })
+  declare lastName: string;
+
+  @AllowNull(false)
+  @Column( {
+    type: DataType.STRING,
+    field: 'role'
+  })
+  declare role: string;
+
+  @AllowNull(true)
+  @Column( {
+    type: DataType.STRING,
+    field: 'key'
+  })
+  declare key: string;
 
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
-  email: string;
+  declare email: string;
 
   @Unique
   @AllowNull(false)
   @Column(DataType.STRING)
-  phone: string;
+  declare phone: string;
 
   @AllowNull(false)
   @Column(DataType.STRING)
-  password: string;
+  declare password: string;
 
   @AllowNull(false)
   @Column({
     type: DataType.FLOAT,
     defaultValue: 0,
   })
-  bonuses: number;
+  declare bonuses: number;
 
   @Column(DataType.STRING)
-  resetToken: string | null;
+  declare resetToken: string | null;
 
   @Column(DataType.DATE)
-  resetTokenExpires: Date | null;
+  declare resetTokenExpires: Date | null;
 }
