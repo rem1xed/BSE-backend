@@ -9,6 +9,8 @@ import { UsersSettingsModule } from './modules/user-settings/user-settings.modul
 import { MeetModule } from './modules/meet/meet.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AdvertisementModule } from './modules/advertisement/advertisement.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
+import { UsersComplaintsModule } from './modules/UserComplaints/UserComplaints.module';
 
 @Module({
   imports: [
@@ -21,7 +23,9 @@ import { AdvertisementModule } from './modules/advertisement/advertisement.modul
     MailModule,
     UsersSettingsModule,
     MeetModule,
-    AdvertisementModule
+    AdvertisementModule,
+    FavoritesModule,
+    UsersComplaintsModule
   ]
 })
 export class AppModule {}

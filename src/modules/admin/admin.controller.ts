@@ -15,13 +15,23 @@ import { AdminRegisterDto } from './dto/register.dto';
 import { MailService } from '../mail/mail.service';
 import { ContactFormDto } from './dto/contactForm.dto';
 import { UsersService } from '../users/users.service';
+import { UserComplaints } from '../UserComplaints/models/UserComplaints.model';
+import { AdvertisementService } from '../advertisement/advertisement.service';
+import { Query } from '@nestjs/common';
+import { UserComplaintsService } from '../UserComplaints/UserComplaints.service';
+
 
 @Controller('admin')
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
     private readonly mailService: MailService,
-    private readonly usersService: UsersService) {}
+    private readonly usersService: UsersService,
+    private readonly advertisementService: AdvertisementService
+    // private readonly userComplaintsService: UserComplaintsService
+    // private userComplaintsModel: typeof UserComplaints,
+    // private userComplaintsModel: typeof UserComplaints
+  ) {}
 
   // ========== ADMIN ENDPOINTS ==========
   // Додаємо префікс /admin для адмінських маршрутів
@@ -83,4 +93,58 @@ export class AdminController {
   async getUsers(){
     return await this.usersService.getAll();
   }
+
+  @UseGuards(JwtAdminGuard)
+  @Get('get/ads')
+  async getAds(
+    @Query('sortField') sortField?: string,
+    @Query('sortDirection') sortDirection?: 'ASC' | 'DESC',
+    @Query('whereId') whereId?: number,
+    @Query('whereTitle') whereTitle?: string,
+    @Query('whereStatus') whereStatus?: string,
+  ) {
+    return await this.advertisementService.findAllAdmin({
+      whereId,
+      whereTitle,
+      whereStatus,
+      sortField,
+      sortDirection,
+    });
+  }
+
+  // @UseGuards(JwtAdminGuard)
+  // @Get('get/usercomp')
+  // async getUserComplaints(
+  //   @Query('sortField') sortField?: string,
+  //   @Query('sortDirection') sortDirection?: 'ASC' | 'DESC',
+  //   @Query('whereId') whereId?: number,
+  //   @Query('whereTitle') whereTitle?: string,
+  //   @Query('whereStatus') whereStatus?: string,
+  // ) {
+  //   return await this.userComplaintsService.findAllAdmin({
+  //     whereId,
+  //     whereTitle,
+  //     whereStatus,
+  //     sortField,
+  //     sortDirection,
+  //   });
+  // }
+
+  // @UseGuards(JwtAdminGuard)
+  // @Get('get/adcomp')
+  // async getAdvertisementComplaints(
+  //   @Query('sortField') sortField?: string,
+  //   @Query('sortDirection') sortDirection?: 'ASC' | 'DESC',
+  //   @Query('whereId') whereId?: number,
+  //   @Query('whereTitle') whereTitle?: string,
+  //   @Query('whereStatus') whereStatus?: string,
+  // ) {
+  //   return await this.advertisementService.findAllAdmin({
+  //     whereId,
+  //     whereTitle,
+  //     whereStatus,
+  //     sortField,
+  //     sortDirection,
+  //   });
+  // }
 }
