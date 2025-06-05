@@ -9,6 +9,8 @@ import {
   BadRequestException,
   Get,
   Param,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { JwtUserGuard } from './guards/jwt-auth.guard';
@@ -59,4 +61,45 @@ export class AdvertisementController {
     const response = await this.advertisementService.findById(id);
     return response;
   }
+
+  @Get('/adsCount/:id')
+  async adsCount(@Param('id', ParseIntPipe) id: number) {
+    const data = await this.advertisementService.findAndCount(id);
+
+    return data;
+  }
+
+  @Get()
+  async getAdvertisements(
+    @Query('category') category?: string,
+    @Query('city') city?: string,
+    @Query('region') region?: string,
+    @Query('search') search?: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+    @Query('sortField') sortField?: string,
+    @Query('sortDirection') sortDirection: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    const offset = (page - 1) * limit;
+
+    const { rows, count } = await this.advertisementService.findAllWithFilters({
+      category,
+      city,
+      region,
+      search,
+      offset,
+      limit,
+      sortField,
+      sortDirection,
+    });
+
+    return {
+      success: true,
+      currentPage: page,
+      totalPages: Math.ceil(count / limit),
+      totalCount: count,
+      data: rows,
+    };
+  }
+
 }

@@ -87,4 +87,28 @@ export class MailService {
       throw error;
     }
   }
+
+
+  async sendMeetForm(username, adLink, meetLink, mailTo){
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+        <h1>Вас запрошують до відео-зустрічі</h1>
+        <p>Користувач ${username}</p>
+        <p>Ваше оголошення: ${adLink}</p>
+        <p>Посилання на зустріч: ${meetLink}</p>
+      </div>
+    `;
+
+    try {
+      await this.mailerService.sendMail({
+        to: mailTo,
+        subject: 'Contact form',
+        html: htmlContent, // Відправляємо HTML напряму, без шаблону
+      });
+      console.log(`Email з контактною формою надіслано на fagefd@gmail.com`);
+    } catch (error) {
+      console.error('Помилка відправки email:', error);
+      throw error;
+    }
+  }
 }

@@ -12,6 +12,8 @@ import {
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { IMeetingResponse } from './meet.interface';
+import { MailService } from '../mail/mail.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class MeetService {
@@ -24,7 +26,10 @@ export class MeetService {
   private readonly TOKEN_PATH: string;
   private readonly CREDENTIALS_PATH: string;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly mailService: MailService,
+    private readonly userService: UsersService) {
     this.TOKEN_PATH = path.join(process.cwd(), 'token.json');
     this.CREDENTIALS_PATH = path.join(process.cwd(), 'credentials.json');
   }
@@ -32,6 +37,7 @@ export class MeetService {
   async createMeetingForUsers(
     user1Id: number,
     user2Id: number,
+    AdLink: string
   ): Promise<IMeetingResponse> {
     try {
       const authClient = await this.authorize();
@@ -42,8 +48,13 @@ export class MeetService {
       }
       const meetUrl = await this.createSpace(authClient);
 
-      console.log('Meeting URL:', meetUrl);
+      const user1 = await this.userService.findById(user1Id);
+      const user2 = await this.userService.findById(user2Id);
 
+      const mailResponse = await this.mailService.sendMeetForm(user1?.firstName+' '+user1?.lastName, AdLink, meetUrl, user2?.email);
+      console.log('Meeting URL:', meetUrl);
+      console.log(mailResponse);
+      
       return {
         meetingUri: meetUrl,
         status: 'created',

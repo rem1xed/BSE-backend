@@ -1,19 +1,24 @@
-import { Controller, Get, Query, ParseIntPipe } from '@nestjs/common';
+import { Controller, Query, ParseIntPipe, UseGuards, Post, Param, Request, Body } from '@nestjs/common';
 import { MeetService } from './meet.service';
+import { JwtUserGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('meet')
 export class MeetController {
   constructor(private readonly meetService: MeetService) {}
 
-  @Get('test')
+  @UseGuards(JwtUserGuard)
+  @Post('generatelink/:id')
   async testMeet(
-    
-    @Query('user1', ParseIntPipe) user1: number,
-    @Query('user2', ParseIntPipe) user2: number
+    @Request() req: any,
+    @Param('id', ParseIntPipe) user2Id: number,
+    @Body('adLink') adLink: string,
   ) {
-    // Optionally, you could fetch user details here using a UsersService
-    // and pass user objects to MeetService if needed.
-    console.log('user1:', user1, 'user2:', user2);
-    return this.meetService.createMeetingForUsers(user1, user2);
+    const user1Id = Number(req.user.id);
+
+    if (user1Id === user2Id || !user1Id || !user2Id) {
+      return null;
+    }
+
+    return this.meetService.createMeetingForUsers(user1Id, user2Id, adLink);
   }
 }

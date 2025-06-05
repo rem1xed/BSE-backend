@@ -150,6 +150,9 @@ importers:
       '@types/supertest':
         specifier: ^6.0.2
         version: 6.0.3
+      cypress:
+        specifier: link:cypress
+        version: link:cypress
       eslint:
         specifier: ^9.18.0
         version: 9.27.0

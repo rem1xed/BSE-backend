@@ -11,12 +11,15 @@ import { AdminService } from './admin.service';
 import { AdminController } from './admin.controller';
 import { contactFormProviders } from './admin.providers';
 import { ContactForm } from './models/contactForm.model';
+import { AdvertisementModule } from '../advertisement/advertisement.module';
+import { UserComplaints } from '../UserComplaints/models/UserComplaints.model';
 
 @Module({
   imports: [
     UsersModule,
+    AdvertisementModule,
     PassportModule,
-    SequelizeModule.forFeature([ContactForm]),
+    SequelizeModule.forFeature([ContactForm]),  //UserComplaints, AdvertisementComplaints
     MailModule,
     ConfigModule.forRoot(),
     JwtModule.registerAsync({
