@@ -20,7 +20,6 @@ export class AdminService {
   // ADMIN METHODS
 
   async adminLogin(user: AdminLoginDto) {
-    console.log("Login dto : ", user);
 
     const email = user.email || user['email'];
     const password = user.password || user['password'];
@@ -46,12 +45,8 @@ export class AdminService {
   }
 
   async validateAdmin(email: string, password: string, key: string): Promise<any> {
-    console.log("VALIDATE email: ", email, "password",  password);
-
     const user = await this.usersService.findByEmail(email);
-    
-    console.log(user);
-
+  
     if (!user) {
       return null;
     }
@@ -61,7 +56,6 @@ export class AdminService {
     }
     
     if (!user.password) {
-      console.log('Користувач знайдений, але пароль відсутній:', user.email);
       return null; // або throw new Error('User has no password set');
     }
     
@@ -125,8 +119,6 @@ export class AdminService {
   }
 
   async createForm(data){
-    console.log(this.contactForm.count());
     await this.contactForm.create({...data});
-    console.log(this.contactForm.count());
   }
 }

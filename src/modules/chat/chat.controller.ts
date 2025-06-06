@@ -1,6 +1,15 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Request,
+  BadRequestException,
+} from '@nestjs/common';
 import { ChatService } from './chat.service';
-import { ChatResponseDto, CreateChatDto } from './dto/chat.dto'; 
+import { ChatResponseDto, CreateChatDto } from './dto/chat.dto';
 import { CreateMessageDto, MessageResponseDto } from './dto/message.dto';
 import { JwtUserGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -11,7 +20,6 @@ export class ChatController {
 
   @Get()
   async getUserChats(@Request() req): Promise<ChatResponseDto[]> {
-    console.log('JWT payload in getUserChats:', req.user);
     const userId = req.user.id;
     return this.chatService.getUserChats(userId);
   }
@@ -19,30 +27,27 @@ export class ChatController {
   @Get(':chatId/messages')
   async getChatMessages(
     @Request() req,
-    @Param('chatId') chatId: string, // Changed to string for proper parsing
+    @Param('chatId') chatId: string,
   ): Promise<MessageResponseDto[]> {
-    console.log('JWT payload in getChatMessages:', req.user);
-    console.log('ChatId param:', chatId);
-    
-    // Parse and validate chatId
     const parsedChatId = parseInt(chatId, 10);
-    
+    if (isNaN(parsedChatId)) {
+      throw new BadRequestException('Invalid chatId');
+    }
+
     const userId = req.user.id;
     return this.chatService.getChatMessages(parsedChatId, userId);
   }
 
   @Post()
   async createChat(@Body() createChatDto: CreateChatDto, @Request() req) {
-    console.log('JWT payload in createChat:', req.user);
+    const userId = req.user.id;
 
-    const userId = req.user.userId || req.user.id || req.user.sub;
-
-    const completeDto = { 
+    const completeDto = {
       ...createChatDto,
-      senderId: userId
+      senderId: userId,
     };
-    
-    return this.chatService.createChat(completeDto);
+
+    return this.chatService.createChat(completeDto); // якщо метод очікує senderId
   }
 
   @Post('messages')
@@ -50,16 +55,14 @@ export class ChatController {
     @Body() createMessageDto: CreateMessageDto,
     @Request() req,
   ): Promise<any> {
-    console.log('JWT payload in sendMessage:', req.user);
-
     createMessageDto.senderId = req.user.id;
-    
+
     const message = await this.chatService.sendMessage(createMessageDto);
 
     return {
-        messageId: message.messageId ,
-        chatId: message.chatId,
-        sentAt: message.sentAt
-      };
+      messageId: message.messageId,
+      chatId: message.chatId,
+      sentAt: message.sentAt,
+    };
   }
 }

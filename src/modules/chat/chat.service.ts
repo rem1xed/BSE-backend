@@ -20,8 +20,6 @@ export class ChatService {
   ) {}
 
 async getUserChats(userId: number): Promise<ChatResponseDto[]> {
-  console.log('Getting chats for userId:', userId);
-  
   if (!userId || isNaN(userId)) {
     throw new BadRequestException('Invalid user ID');
   }
@@ -50,8 +48,6 @@ async getUserChats(userId: number): Promise<ChatResponseDto[]> {
     ],
     order: [['lastMessageAt', 'DESC']],
   });
-
-  console.log('Retrieved chats count:', chats.length);
   
   if (chats.length === 0) {
     return [];
@@ -61,7 +57,6 @@ async getUserChats(userId: number): Promise<ChatResponseDto[]> {
   const chatResponses = await Promise.all(chats.map(async (chat) => {
     // Convert to plain object
     const plainChat = chat.toJSON ? chat.toJSON() : chat;
-    console.log(`Processing chat ${plainChat.chatId}`);
     
     // Determine the other user (not the current user)
     const isCurrentUserSender = plainChat.senderId === userId;
@@ -112,7 +107,6 @@ async getUserChats(userId: number): Promise<ChatResponseDto[]> {
 }
 
   async getChatMessages(chatId: number, userId: number): Promise<MessageResponseDto[]> {
-    console.log('Getting messages for chatId:', chatId, 'userId:', userId);
     // Check if chat exists and user is part of it
 
     if (!chatId || isNaN(chatId)) {
@@ -147,7 +141,6 @@ async getUserChats(userId: number): Promise<ChatResponseDto[]> {
       order: [['sentAt', 'ASC']],
     });
   
-    console.log('Retrieved messages count:', messages.length);
   
     // Mark messages as read if they were sent to the current user
     await this.messageModel.update(
@@ -164,7 +157,6 @@ async getUserChats(userId: number): Promise<ChatResponseDto[]> {
       const messageResponses = messages.map((message) => {
 
       const plainMessage = message.toJSON ? message.toJSON() : message;
-      console.log(`Processing message ${plainMessage.messageId}, sender info:`, plainMessage.sender);
       
       let senderName = 'Unknown User';
       if (plainMessage.sender) {
@@ -186,6 +178,9 @@ async getUserChats(userId: number): Promise<ChatResponseDto[]> {
   }
 
   async createChat(createChatDto: CreateChatDto): Promise<Chat> {
+    if (!createChatDto.senderId) {
+      throw new BadRequestException('Sender ID is required');
+    }
 
     const existingChat = await this.chatModel.findOne({
       where: {
@@ -207,7 +202,6 @@ async getUserChats(userId: number): Promise<ChatResponseDto[]> {
       return existingChat;
     }
 
-
     return this.chatModel.create({
       adId: createChatDto.adId,
       senderId: createChatDto.senderId,
@@ -223,10 +217,11 @@ async getUserChats(userId: number): Promise<ChatResponseDto[]> {
       throw new NotFoundException('Chat not found');
     }
 
-    // Check if user is part of the chat
-    console.log("chat.senderId", chat.get('senderId'));
-    console.log("createMessageDto.senderId", createMessageDto.senderId);
-    if (chat.get('senderId') !== createMessageDto.senderId) {
+    // Check if user is part of the chat (дозволяємо і sender, і receiver)
+    if (
+      chat.get('senderId') !== createMessageDto.senderId &&
+      chat.get('receiverId') !== createMessageDto.senderId
+    ) {
       throw new BadRequestException('You are not a participant in this chat');
     }
 

@@ -42,7 +42,6 @@ export class MeetService {
     try {
       const authClient = await this.authorize();
 
-      console.log('authClient:', authClient);
       if (!authClient) {
         throw new Error('Failed to authorize with Google');
       }
@@ -52,8 +51,6 @@ export class MeetService {
       const user2 = await this.userService.findById(user2Id);
 
       const mailResponse = await this.mailService.sendMeetForm(user1?.firstName+' '+user1?.lastName, AdLink, meetUrl, user2?.email);
-      console.log('Meeting URL:', meetUrl);
-      console.log(mailResponse);
       
       return {
         meetingUri: meetUrl,

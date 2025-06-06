@@ -30,9 +30,7 @@ export class MailService {
         subject: 'Скидання пароля',
         html: htmlContent, // Відправляємо HTML напряму, без шаблону
       });
-      console.log(`Email з кодом відновлення надіслано на ${email}`);
     } catch (error) {
-      console.error('Помилка відправки email:', error);
       throw error;
     }
   }
@@ -56,9 +54,7 @@ export class MailService {
         subject: 'Скидання пароля',
         html: htmlContent, // Відправляємо HTML напряму, без шаблону
       });
-      console.log(`Email з посиланням на google meet надіслано на ${email}`);
     } catch (error) {
-      console.error('Помилка відправки email:', error);
       throw error;
     }
   }
@@ -81,9 +77,7 @@ export class MailService {
         subject: 'Contact form',
         html: htmlContent, // Відправляємо HTML напряму, без шаблону
       });
-      console.log(`Email з контактною формою надіслано на fagefd@gmail.com`);
     } catch (error) {
-      console.error('Помилка відправки email:', error);
       throw error;
     }
   }
@@ -105,9 +99,7 @@ export class MailService {
         subject: 'Contact form',
         html: htmlContent, // Відправляємо HTML напряму, без шаблону
       });
-      console.log(`Email з контактною формою надіслано на fagefd@gmail.com`);
     } catch (error) {
-      console.error('Помилка відправки email:', error);
       throw error;
     }
   }
