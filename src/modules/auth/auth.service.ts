@@ -25,8 +25,6 @@ export class AuthService {
   //USERS METHODS
 
   async login(user: LoginDto) {
-    console.log("Login dto : ", user);
-
     const email = user.email || user['email'];
     const password = user.password || user['password'];
     const validatedUser = await this.validateUser(email, password);
@@ -53,7 +51,6 @@ export class AuthService {
   
 
   async validateUser(email: string, password: string): Promise<any> {
-    console.log("VALIDATE email: ", email, "password",  password);
 
     const user = await this.usersService.findByEmail(email);
     
@@ -62,7 +59,6 @@ export class AuthService {
     }
     
     if (!user.password) {
-      console.log('Користувач знайдений, але пароль відсутній:', user.email);
       return null; // або throw new Error('User has no password set');
     }
     
